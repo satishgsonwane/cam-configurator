@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react"
 import CameraSelector from "../components/CameraSelector"
 import LandmarkSelector from "../components/LandmarkSelector"
-import IPAddressInput from "../components/IPAddressInput"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,7 +17,6 @@ export default function Home() {
   const [panValue, setPanValue] = useState("")
   const [tiltValue, setTiltValue] = useState("")
   const [zoomValue, setZoomValue] = useState("12000")
-  const [ipAddress, setIpAddress] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [panError, setPanError] = useState("")
@@ -82,7 +80,7 @@ export default function Home() {
       const response = await fetch("/api/move", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ camera: selectedCamera, message, ipAddress }),
+        body: JSON.stringify({ camera: selectedCamera, message }),
       })
       if (!response.ok) throw new Error("Failed to send NATS message")
       alert("Move command sent successfully")
@@ -155,7 +153,6 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
         <h1 className="text-4xl font-bold mb-8">Camera Configuration Utility</h1>
-        <IPAddressInput ipAddress={ipAddress} setIpAddress={setIpAddress} />
         <div className="mb-4">
           <CameraSelector
             config={config}
