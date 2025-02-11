@@ -17,15 +17,17 @@ export default function Home() {
   const [selectedLandmark, setSelectedLandmark] = useState("")
   const [panValue, setPanValue] = useState("")
   const [tiltValue, setTiltValue] = useState("")
-  const [zoomValue, setZoomValue] = useState("")
+  const [zoomValue, setZoomValue] = useState("12000")
   const [ipAddress, setIpAddress] = useState("")
-  const fileInputRef = useRef(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [panError, setPanError] = useState("")
   const [tiltError, setTiltError] = useState("")
   const [zoomError, setZoomError] = useState("")
 
   const cameraStatus = useCameraStatus()
+
+  const [zoom, setZoom] = useState<number>(12000)
 
   useEffect(() => {
     fetch("/api/config")
@@ -119,8 +121,9 @@ export default function Home() {
     }
   }
 
-  const handleImport = async (event) => {
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault()
+    if (!fileInputRef.current?.files) return
     const file = fileInputRef.current.files[0]
     if (!file) {
       alert("Please select a file to import")
@@ -239,7 +242,7 @@ export default function Home() {
         </div>
         <div className="mb-4">
           <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
-          <Button onClick={() => fileInputRef.current.click()}>Import Configuration</Button>
+          <Button onClick={() => fileInputRef.current?.click()}>Import Configuration</Button>
         </div>
         <div className="mt-4">
           <h3>Camera Status:</h3>
