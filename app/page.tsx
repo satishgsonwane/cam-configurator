@@ -158,10 +158,14 @@ export default function Home() {
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
         <h1 className="text-4xl font-bold mb-8">Camera Configuration Utility</h1>
         
-        <div className="mb-4 flex gap-2">
-          <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
-          <Button onClick={() => fileInputRef.current?.click()}>Import Configuration</Button>
-          <Button onClick={handleUpdate}>Update Configuration</Button>
+        <div className="mb-4 flex justify-between">
+          <div>
+            <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
+            <Button onClick={() => fileInputRef.current?.click()}>Import Configuration</Button>
+          </div>
+          <div>
+            <Button onClick={handleUpdate}>Update Configuration</Button>
+          </div>
         </div>
 
         <div className="mb-4">
@@ -242,8 +246,8 @@ export default function Home() {
             </Alert>
           )}
         </div>
-        <div className="flex justify-between mb-4">
-          <Button onClick={handleMove} className="mr-2">
+        <div className="mb-4 mt-8">
+          <Button onClick={handleMove} className="w-full">
             Move
           </Button>
         </div>
