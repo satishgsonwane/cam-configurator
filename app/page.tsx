@@ -153,6 +153,29 @@ export default function Home() {
     }
   }
 
+  const handleReset = async () => {
+    if (!selectedCamera) return
+
+    const message = {
+      pansetpoint: 0,
+      tiltsetpoint: 0,
+      zoomsetpoint: 0,
+    }
+
+    try {
+      const response = await fetch("/api/move", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ camera: selectedCamera, message }),
+      })
+      if (!response.ok) throw new Error("Failed to send reset command")
+      alert("Reset command sent successfully")
+    } catch (error) {
+      console.error("Error sending reset command:", error)
+      alert("Failed to send reset command")
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
@@ -162,6 +185,9 @@ export default function Home() {
           <div>
             <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
             <Button onClick={() => fileInputRef.current?.click()}>Import Configuration</Button>
+          </div>
+          <div>
+            <Button onClick={handleReset} variant="outline">Recenter</Button>
           </div>
           <div>
             <Button onClick={handleUpdate}>Update Configuration</Button>
