@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { useCameraStatus } from '@/hooks/use-camera-status'
 
 export default function Home() {
   const [config, setConfig] = useState(null)
@@ -22,8 +21,6 @@ export default function Home() {
   const [panError, setPanError] = useState("")
   const [tiltError, setTiltError] = useState("")
   const [zoomError, setZoomError] = useState("")
-
-  const cameraStatus = useCameraStatus()
 
   const [zoom, setZoom] = useState<number>(12000)
 
@@ -249,14 +246,6 @@ export default function Home() {
           <Button onClick={handleMove} className="mr-2">
             Move
           </Button>
-        </div>
-        <div className="mt-4">
-          <h3>Camera Status:</h3>
-          {Object.entries(cameraStatus).map(([camera, status]) => (
-            <div key={camera}>
-              Camera {camera}: {status}
-            </div>
-          ))}
         </div>
       </div>
     </main>
