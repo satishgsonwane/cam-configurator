@@ -27,6 +27,8 @@ export default function Home() {
 
   const [zoom, setZoom] = useState<number>(12000)
 
+  const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+
   useEffect(() => {
     fetch("/api/config")
       .then((response) => response.json())
@@ -184,6 +186,23 @@ export default function Home() {
     }
   }
 
+  const handleSaveConfig = async () => {
+    setSaveStatus("loading")
+    try {
+      const response = await fetch("/api/format", {
+        method: "POST"
+      })
+      
+      if (!response.ok) throw new Error("Save failed")
+      setSaveStatus("success")
+      setTimeout(() => setSaveStatus("idle"), 2000)
+    } catch (error) {
+      console.error("Save error:", error)
+      setSaveStatus("error")
+      setTimeout(() => setSaveStatus("idle"), 2000)
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="z-10 w-full max-w-4xl space-y-8">
@@ -211,9 +230,15 @@ export default function Home() {
                 Recenter
               </Button>
             </div>
-            <Button onClick={handleUpdate} className="bg-green-600 hover:bg-green-700">
+            <Button 
+              onClick={handleSaveConfig}
+              disabled={saveStatus === "loading"}
+              className="bg-green-600 hover:bg-green-700"
+            >
               <Save className="h-4 w-4 mr-2" />
-              Save Configuration
+              {saveStatus === "loading" ? "Saving..." : 
+               saveStatus === "success" ? "Saved!" :
+               saveStatus === "error" ? "Error!" : "Save Configuration"}
             </Button>
           </CardContent>
         </Card>

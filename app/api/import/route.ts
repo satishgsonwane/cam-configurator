@@ -16,8 +16,8 @@ export async function POST(req: Request) {
     // Parse the uploaded JSON to validate it
     JSON.parse(content)
 
-    // If parsing succeeds, write the file
-    await fs.writeFile(process.cwd() + "/app/data/config.json", content)
+    // Write to imported.json instead of config.json
+    await fs.writeFile(process.cwd() + "/app/data/imported.json", content)
 
     return NextResponse.json({ success: true })
   } catch (error) {
