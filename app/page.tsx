@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import Image from 'next/image'
 
 export default function Home() {
   const [config, setConfig] = useState(null)
@@ -281,6 +282,17 @@ export default function Home() {
           <Button onClick={handleMove} className="w-full">
             Move
           </Button>
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <Image
+            src="/field.png"
+            alt="Football field layout"
+            width={1000}
+            height={500}
+            className="rounded-lg border border-gray-200"
+            priority
+          />
         </div>
       </div>
     </main>
