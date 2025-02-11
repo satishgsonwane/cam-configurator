@@ -187,7 +187,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="z-10 w-full max-w-4xl space-y-8">
-        <h1 className="text-4xl font-bold text-gray-900 text-center">PTZ Camera Controller</h1>
+        <h1 className="text-4xl font-bold text-gray-900 text-center">Camera Calibration Utility</h1>
         
         {/* Action Buttons Card */}
         <Card>
@@ -197,13 +197,17 @@ export default function Home() {
               <Button 
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
-                className="gap-2"
+                className="gap-2 bg-blue-100 hover:bg-blue-200 text-blue-600 border-blue-300 hover:border-blue-400 transition-colors font-semibold"
               >
-                <Upload className="h-4 w-4" />
+                <Upload className="h-4 w-4 text-blue-600" />
                 Import Config
               </Button>
-              <Button onClick={handleReset} variant="outline">
-                <Crosshair className="h-4 w-4 mr-2" />
+              <Button 
+                onClick={handleReset} 
+                variant="outline"
+                className="bg-purple-100 hover:bg-purple-200 text-purple-600 border-purple-300 hover:border-purple-400 transition-colors font-semibold"
+              >
+                <Crosshair className="h-4 w-4 mr-2 text-purple-600" />
                 Recenter
               </Button>
             </div>
@@ -291,7 +295,7 @@ export default function Home() {
                 className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg"
               >
                 <Move3D className="h-5 w-5 mr-2" />
-                Execute Move
+                Boom ! Bam!
               </Button>
             </CardContent>
           </Card>
