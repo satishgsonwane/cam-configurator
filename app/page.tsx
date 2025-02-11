@@ -156,6 +156,11 @@ export default function Home() {
   const handleReset = async () => {
     if (!selectedCamera) return
 
+    // Update the input fields
+    setPanValue("0")
+    setTiltValue("0")
+    setZoomValue("0")
+
     const message = {
       pansetpoint: 0,
       tiltsetpoint: 0,
