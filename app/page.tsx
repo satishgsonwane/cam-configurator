@@ -97,6 +97,13 @@ export default function Home() {
       return
     }
 
+    // Add confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to update the configuration?\n\nCamera: ${selectedCamera}\nLandmark: ${selectedLandmark}\nPan: ${panValue}\nTilt: ${tiltValue}`
+    )
+
+    if (!confirmed) return
+
     try {
       const response = await fetch("/api/update", {
         method: "POST",
@@ -153,6 +160,13 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
         <h1 className="text-4xl font-bold mb-8">Camera Configuration Utility</h1>
+        
+        <div className="mb-4 flex gap-2">
+          <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
+          <Button onClick={() => fileInputRef.current?.click()}>Import Configuration</Button>
+          <Button onClick={handleUpdate}>Update Configuration</Button>
+        </div>
+
         <div className="mb-4">
           <CameraSelector
             config={config}
@@ -235,11 +249,6 @@ export default function Home() {
           <Button onClick={handleMove} className="mr-2">
             Move
           </Button>
-          <Button onClick={handleUpdate}>Update Configuration</Button>
-        </div>
-        <div className="mb-4">
-          <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
-          <Button onClick={() => fileInputRef.current?.click()}>Import Configuration</Button>
         </div>
         <div className="mt-4">
           <h3>Camera Status:</h3>
