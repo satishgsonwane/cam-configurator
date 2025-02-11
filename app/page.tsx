@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import Image from 'next/image'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Upload, Crosshair, Save, Move3D } from "lucide-react"
 
 export default function Home() {
   const [config, setConfig] = useState(null)
@@ -183,117 +185,135 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold mb-8">Camera Configuration Utility</h1>
+    <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="z-10 w-full max-w-4xl space-y-8">
+        <h1 className="text-4xl font-bold text-gray-900 text-center">PTZ Camera Controller</h1>
         
-        <div className="mb-4 flex justify-between">
-          <div>
-            <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
-            <Button onClick={() => fileInputRef.current?.click()}>Import Configuration</Button>
-          </div>
-          <div>
-            <Button onClick={handleReset} variant="outline">Recenter</Button>
-          </div>
-          <div>
-            <Button onClick={handleUpdate}>Update Configuration</Button>
-          </div>
+        {/* Action Buttons Card */}
+        <Card>
+          <CardContent className="flex justify-between p-4 gap-4">
+            <div className="flex gap-4">
+              <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
+              <Button 
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Import Config
+              </Button>
+              <Button onClick={handleReset} variant="outline">
+                <Crosshair className="h-4 w-4 mr-2" />
+                Recenter
+              </Button>
+            </div>
+            <Button onClick={handleUpdate} className="bg-green-600 hover:bg-green-700">
+              <Save className="h-4 w-4 mr-2" />
+              Save Configuration
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Camera Controls Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Camera Selection Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Camera Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <CameraSelector
+                config={config}
+                selectedCamera={selectedCamera}
+                setSelectedCamera={setSelectedCamera}
+                setSelectedLandmark={setSelectedLandmark}
+              />
+              <LandmarkSelector
+                config={config}
+                selectedCamera={selectedCamera}
+                selectedLandmark={selectedLandmark}
+                setSelectedLandmark={setSelectedLandmark}
+                setPanValue={setPanValue}
+                setTiltValue={setTiltValue}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Position Controls Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Position Controls</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Pan (°)</Label>
+                  <Input
+                    type="number"
+                    value={panValue}
+                    onChange={(e) => {
+                      setPanValue(e.target.value)
+                      validatePan(e.target.value)
+                    }}
+                  />
+                  {panError && <Alert variant="destructive" className="text-xs p-2">{panError}</Alert>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Tilt (°)</Label>
+                  <Input
+                    type="number"
+                    value={tiltValue}
+                    onChange={(e) => {
+                      setTiltValue(e.target.value)
+                      validateTilt(e.target.value)
+                    }}
+                  />
+                  {tiltError && <Alert variant="destructive" className="text-xs p-2">{tiltError}</Alert>}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Zoom Level</Label>
+                <Input
+                  type="number"
+                  value={zoomValue}
+                  onChange={(e) => {
+                    setZoomValue(e.target.value)
+                    validateZoom(e.target.value)
+                  }}
+                />
+                {zoomError && <Alert variant="destructive" className="text-xs p-2">{zoomError}</Alert>}
+              </div>
+
+              <Button 
+                onClick={handleMove} 
+                className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg"
+              >
+                <Move3D className="h-5 w-5 mr-2" />
+                Execute Move
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="mb-4">
-          <CameraSelector
-            config={config}
-            selectedCamera={selectedCamera}
-            setSelectedCamera={setSelectedCamera}
-            setSelectedLandmark={setSelectedLandmark}
-          />
-        </div>
-        <div className="mb-4">
-          <LandmarkSelector
-            config={config}
-            selectedCamera={selectedCamera}
-            selectedLandmark={selectedLandmark}
-            setSelectedLandmark={setSelectedLandmark}
-            setPanValue={setPanValue}
-            setTiltValue={setTiltValue}
-          />
-        </div>
-        <div className="mb-4">
-          <Label htmlFor="pan-value">Pan Value:</Label>
-          <Input
-            id="pan-value"
-            type="number"
-            value={panValue}
-            onChange={(e) => {
-              setPanValue(e.target.value)
-              validatePan(e.target.value)
-            }}
-            className="w-full"
-          />
-          {panError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{panError}</AlertDescription>
-            </Alert>
-          )}
-        </div>
-        <div className="mb-4">
-          <Label htmlFor="tilt-value">Tilt Value:</Label>
-          <Input
-            id="tilt-value"
-            type="number"
-            value={tiltValue}
-            onChange={(e) => {
-              setTiltValue(e.target.value)
-              validateTilt(e.target.value)
-            }}
-            className="w-full"
-          />
-          {tiltError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{tiltError}</AlertDescription>
-            </Alert>
-          )}
-        </div>
-        <div className="mb-4">
-          <Label htmlFor="zoom-value">Zoom Value:</Label>
-          <Input
-            id="zoom-value"
-            type="number"
-            value={zoomValue}
-            onChange={(e) => {
-              setZoomValue(e.target.value)
-              validateZoom(e.target.value)
-            }}
-            className="w-full"
-          />
-          {zoomError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{zoomError}</AlertDescription>
-            </Alert>
-          )}
-        </div>
-        <div className="mb-4 mt-8">
-          <Button onClick={handleMove} className="w-full">
-            Move
-          </Button>
-        </div>
-
-        <div className="mt-8 flex justify-center">
-          <Image
-            src="/field.png"
-            alt="Football field layout"
-            width={1000}
-            height={500}
-            className="rounded-lg border border-gray-200"
-            priority
-          />
-        </div>
+        {/* Field Visualization */}
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-lg">Field Visualization</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative aspect-video rounded-lg overflow-hidden border">
+              <Image
+                src="/field.png"
+                alt="Football field layout"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </main>
   )
