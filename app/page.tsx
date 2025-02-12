@@ -13,6 +13,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, Crosshair, Save, Move3D, Download } from "lucide-react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 export default function Home() {
   const [config, setConfig] = useState(null)
   const [selectedCamera, setSelectedCamera] = useState("")
@@ -252,38 +259,49 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="z-10 w-full max-w-4xl space-y-8">
+      <div className="z-10 w-full max-w-6xl space-y-8">
         <h1 className="text-4xl font-bold text-gray-900 text-center">Camera Calibration Utility</h1>
+        <h2 className="text-2xl font-bold text-gray-900 text-center text-red-500">Start by importing relevant config first!</h2>
         
         {/* Action Buttons Card */}
         <Card>
           <CardContent className="flex justify-between p-4 gap-4">
             <div className="flex gap-4">
               <input type="file" accept=".json" ref={fileInputRef} className="hidden" onChange={handleImport} />
-              <Button 
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="gap-2 bg-blue-100 hover:bg-blue-200 text-blue-600 border-blue-300 hover:border-blue-400 transition-colors font-semibold"
-              >
-                <Upload className="h-4 w-4 text-blue-600" />
-                Import Config
-              </Button>
-              <Button 
-                onClick={handleDownload}
-                variant="outline"
-                className="gap-2 bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400 transition-colors font-semibold"
-              >
-                <Download className="h-4 w-4 text-green-600" />
-                Export Config
-              </Button>
-              <Button 
-                onClick={handleReset} 
-                variant="outline"
-                className="bg-purple-100 hover:bg-purple-200 text-purple-600 border-purple-300 hover:border-purple-400 transition-colors font-semibold"
-              >
-                <Crosshair className="h-4 w-4 mr-2 text-purple-600" />
-                Recenter
-              </Button>
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      onClick={() => fileInputRef.current?.click()}
+                      variant="outline"
+                      className="gap-2 bg-blue-100 hover:bg-blue-200 text-blue-600 border-blue-300 hover:border-blue-400 transition-colors font-semibold"
+                    >
+                      <Upload className="h-4 w-4 text-blue-600" />
+                      Import Config
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Import Config to edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      onClick={handleDownload}
+                      variant="outline"
+                      className="gap-2 bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400 transition-colors font-semibold"
+                    >
+                      <Download className="h-4 w-4 text-green-600" />
+                      Export Config
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Download edited config.json</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             <ConfirmDialog
@@ -305,106 +323,126 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        {/* Camera Controls Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Camera Selection Card */}
-          <Card>
+        {/* Main Content Area - Grid Layout */}
+        <div className="grid grid-cols-2 gap-6">
+          {/* Left Column - Field Visualization */}
+          <Card className="overflow-hidden h-full">
             <CardHeader>
-              <CardTitle className="text-lg">Camera Configuration</CardTitle>
+              <CardTitle className="text-lg">Field Visualization</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <CameraSelector
-                config={config}
-                selectedCamera={selectedCamera}
-                setSelectedCamera={setSelectedCamera}
-                setSelectedLandmark={setSelectedLandmark}
-              />
-              <LandmarkSelector
-                config={config}
-                selectedCamera={selectedCamera}
-                selectedLandmark={selectedLandmark}
-                setSelectedLandmark={setSelectedLandmark}
-                setPanValue={setPanValue}
-                setTiltValue={setTiltValue}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Position Controls Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Position Controls</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Pan (°)</Label>
-                  <Input
-                    type="number"
-                    value={panValue}
-                    onChange={(e) => {
-                      setPanValue(e.target.value)
-                      validatePan(e.target.value)
-                    }}
-                  />
-                  {panError && <Alert variant="destructive" className="text-xs p-2">{panError}</Alert>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Tilt (°)</Label>
-                  <Input
-                    type="number"
-                    value={tiltValue}
-                    onChange={(e) => {
-                      setTiltValue(e.target.value)
-                      validateTilt(e.target.value)
-                    }}
-                  />
-                  {tiltError && <Alert variant="destructive" className="text-xs p-2">{tiltError}</Alert>}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Zoom Level</Label>
-                <Input
-                  type="number"
-                  value={zoomValue}
-                  onChange={(e) => {
-                    setZoomValue(e.target.value)
-                    validateZoom(e.target.value)
-                  }}
+            <CardContent className="flex items-center justify-center p-4">
+              <div className="relative w-full h-[650px]">
+                <Image
+                  src="/field.png"
+                  alt="Football field layout"
+                  fill
+                  className="object-contain rotate-90 scale-[1.35] transform-gpu"
+                  priority
                 />
-                {zoomError && <Alert variant="destructive" className="text-xs p-2">{zoomError}</Alert>}
               </div>
-
-              <Button 
-                onClick={handleMove} 
-                className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg"
-              >
-                <Move3D className="h-5 w-5 mr-2" />
-                Boom ! Bam!
-              </Button>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Field Visualization */}
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg">Field Visualization</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="relative aspect-video rounded-lg overflow-hidden border">
-              <Image
-                src="/field.png"
-                alt="Football field layout"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          </CardContent>
-        </Card>
+          {/* Right Column - Camera Controls */}
+          <div className="space-y-6">
+            {/* Camera Selection Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Camera Selection</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <CameraSelector
+                  config={config}
+                  selectedCamera={selectedCamera}
+                  setSelectedCamera={setSelectedCamera}
+                  setSelectedLandmark={setSelectedLandmark}
+                />
+                <LandmarkSelector
+                  config={config}
+                  selectedCamera={selectedCamera}
+                  selectedLandmark={selectedLandmark}
+                  setSelectedLandmark={setSelectedLandmark}
+                  setPanValue={setPanValue}
+                  setTiltValue={setTiltValue}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Camera Controls Card */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pr-6">
+                <CardTitle className="text-lg">Position Controls</CardTitle>
+                <TooltipProvider>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleReset} 
+                        variant="outline"
+                        className="bg-purple-100 hover:bg-purple-200 text-purple-600 border-purple-300 hover:border-purple-400 transition-colors font-semibold"
+                      >
+                        <Crosshair className="h-4 w-4 mr-2 text-purple-600" />
+                        Recenter
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Move cameras to Pan: Zero, Tilt: Zero and Zoom: Zero</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Pan (°)</Label>
+                    <Input
+                      type="number"
+                      value={panValue}
+                      onChange={(e) => {
+                        setPanValue(e.target.value)
+                        validatePan(e.target.value)
+                      }}
+                    />
+                    {panError && <Alert variant="destructive" className="text-xs p-2">{panError}</Alert>}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Tilt (°)</Label>
+                    <Input
+                      type="number"
+                      value={tiltValue}
+                      onChange={(e) => {
+                        setTiltValue(e.target.value)
+                        validateTilt(e.target.value)
+                      }}
+                    />
+                    {tiltError && <Alert variant="destructive" className="text-xs p-2">{tiltError}</Alert>}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Zoom Level</Label>
+                  <Input
+                    type="number"
+                    value={zoomValue}
+                    onChange={(e) => {
+                      setZoomValue(e.target.value)
+                      validateZoom(e.target.value)
+                    }}
+                  />
+                  {zoomError && <Alert variant="destructive" className="text-xs p-2">{zoomError}</Alert>}
+                </div>
+
+                <Button 
+                  onClick={handleMove} 
+                  className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg"
+                >
+                  <Move3D className="h-5 w-5 mr-2" />
+                  Boom ! Bam!
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </main>
   )
