@@ -11,9 +11,23 @@ export async function GET() {
       return NextResponse.json({ camera_config: [] })
     }
 
-    const response = await fetch(configBlob.url)
-    const config = await response.json()
+    // Add cache-busting query parameter
+    const url = new URL(configBlob.url)
+    url.searchParams.append('t', Date.now().toString())
+
+    const response = await fetch(url, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    })
     
+    if (!response.ok) {
+      throw new Error('Failed to fetch configuration')
+    }
+
+    const config = await response.json()
     return NextResponse.json(config)
   } catch (error) {
     console.error("Error fetching config:", error)

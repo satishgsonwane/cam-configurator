@@ -27,13 +27,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid camera or landmark" }, { status: 400 })
     }
 
-    cameraConfig.calibration_data[landmark] = [pan, tilt]
+    // Update the values
+    cameraConfig.calibration_data[landmark] = [Number(pan), Number(tilt)]
 
     // Store updated config in blob storage
     const { url } = await put('config/config.json', JSON.stringify(config, null, 2), {
       access: 'public',
-      addRandomSuffix: false, // Keep the same filename
+      addRandomSuffix: false,
+      contentType: 'application/json',
     })
+
+    // Verify the update
+    const verifyResponse = await fetch(url)
+    const verifiedConfig = await verifyResponse.json()
+    const verifiedCamera = verifiedConfig.camera_config.find((cam) => cam.camera_id.toString() === camera)
+    
+    if (!verifiedCamera || 
+        !verifiedCamera.calibration_data || 
+        !verifiedCamera.calibration_data[landmark] ||
+        verifiedCamera.calibration_data[landmark][0] !== Number(pan) ||
+        verifiedCamera.calibration_data[landmark][1] !== Number(tilt)) {
+      throw new Error("Verification failed - config not updated correctly")
+    }
 
     return NextResponse.json({ success: true, url })
   } catch (error) {

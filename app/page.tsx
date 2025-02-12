@@ -139,21 +139,26 @@ export default function Home() {
       
       const data = await response.json()
       if (data.success) {
-        // Refresh the configuration from the updated blob
-        const updatedConfig = await fetch("/api/config").then((res) => res.json())
-        setConfig(updatedConfig)
+        // Fetch fresh configuration with cache-busting
+        const updatedConfig = await fetch(`/api/config?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        }).then((res) => res.json())
         
+        setConfig(updatedConfig)
         toast.success("Configuration updated successfully")
         setSaveStatus("success")
       } else {
-        throw new Error("Failed to update configuration")
+        throw new Error(data.error || "Failed to update configuration")
       }
     } catch (error) {
       console.error("Error updating configuration:", error)
-      toast.error("Failed to update configuration")
+      toast.error(error.message || "Failed to update configuration")
       setSaveStatus("error")
     } finally {
-      // Reset save status after a delay
       setTimeout(() => {
         setSaveStatus("idle")
       }, 2000)
