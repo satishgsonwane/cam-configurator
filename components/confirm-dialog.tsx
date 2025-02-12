@@ -12,25 +12,35 @@ import {
 import { Button } from "@/components/ui/button"
 import { Save } from "lucide-react"
 
+interface ConfirmDialogProps {
+    title: string
+    description: React.ReactNode,
+    onConfirm: () => void,
+    onCancel: () => void,
+    triggerText: string,
+    triggerClassName?: string,
+    triggerIcon?: React.ReactNode,
+}
+
 export function ConfirmDialog({
     title,
     description,
     onConfirm,
     onCancel,
     triggerText,
-}: {
-    title: string
-    description: React.ReactNode,
-    onConfirm: () => void,
-    onCancel: () => void,
-    triggerText: string,
-}) {
+    triggerClassName,
+    triggerIcon
+}: ConfirmDialogProps) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700">
-                <Save className="h-4 w-4 mr-2" />
-                {triggerText}</Button>
+                <Button 
+                    variant="outline"
+                    className={triggerClassName}
+                >
+                    {triggerIcon}
+                    {triggerText}
+                </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

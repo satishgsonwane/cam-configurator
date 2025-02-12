@@ -258,10 +258,10 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="z-10 w-full max-w-6xl space-y-8">
-        <h1 className="text-4xl font-bold text-gray-900 text-center">Camera Calibration Utility</h1>
-        <h2 className="text-2xl font-bold text-gray-900 text-center text-red-500">Start by importing relevant config first!</h2>
+    <main className="flex min-h-screen flex-col items-center p-4 bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="z-10 w-full space-y-2">
+        <h1 className="text-4xl font-bold text-gray-900 ">Camera Calibration Utility</h1>
+        <h2 className="text-2xl font-bold text-gray-900 text-red-500">Start by importing relevant config first!</h2>
         
         {/* Action Buttons Card */}
         <Card>
@@ -281,45 +281,48 @@ export default function Home() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Import Config to edit</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      onClick={handleDownload}
-                      variant="outline"
-                      className="gap-2 bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400 transition-colors font-semibold"
-                    >
-                      <Download className="h-4 w-4 text-green-600" />
-                      Export Config
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Download edited config.json</p>
+                    <p>Import config json to check and edit</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
 
-            <ConfirmDialog
-              title="Save Configuration"
-              description={<div>
-                <h4 className="font-bold">Are you sure you want to save the configuration?</h4>
-                <br/>
-                <p>Camera: {selectedCamera}</p>
-                <p>Landmark: {selectedLandmark}</p>
-                <p>Pan: {panValue}</p>
-                <p>Tilt: {tiltValue}</p>
-              </div>}
-              onConfirm={handleUpdate}
-              onCancel={() => {}}
-              triggerText={saveStatus === "loading" ? "Saving..." : 
-               saveStatus === "success" ? "Saved!" :
-               saveStatus === "error" ? "Error!" : "Save Configuration"}
-            />
+            <div className="flex gap-4">
+              <ConfirmDialog
+                title="Download Configuration"
+                description={
+                  <div>
+                    <h4 className="font-bold">Download the current configuration?</h4>
+                    <br/>
+                    <p>This will download the current state of the configuration as a JSON file.</p>
+                  </div>
+                }
+                onConfirm={handleDownload}
+                onCancel={() => {}}
+                triggerText="Download Config"
+                triggerClassName="gap-2 bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400 transition-colors font-semibold"
+                triggerIcon={<Download className="h-4 w-4 text-green-600" />}
+              />
+
+              <ConfirmDialog
+                title="Save Configuration"
+                description={<div>
+                  <h4 className="font-bold">Are you sure you want to save the configuration?</h4>
+                  <br/>
+                  <p>Camera: {selectedCamera}</p>
+                  <p>Landmark: {selectedLandmark}</p>
+                  <p>Pan: {panValue}</p>
+                  <p>Tilt: {tiltValue}</p>
+                </div>}
+                onConfirm={handleUpdate}
+                onCancel={() => {}}
+                triggerText={saveStatus === "loading" ? "Saving..." : 
+                 saveStatus === "success" ? "Saved!" :
+                 saveStatus === "error" ? "Error!" : "Save Configuration"}
+                triggerClassName="gap-2 bg-gray-900 hover:bg-red-800 text-white border-gray-800 hover:border-red-700 transition-colors font-semibold"
+                triggerIcon={<Save className="h-4 w-4 text-white" />}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -336,7 +339,7 @@ export default function Home() {
                   src="/field.png"
                   alt="Football field layout"
                   fill
-                  className="object-contain rotate-90 scale-[1.35] transform-gpu"
+                  className="object-contain rotate-0 scale-[1] transform-gpu"
                   priority
                 />
               </div>
