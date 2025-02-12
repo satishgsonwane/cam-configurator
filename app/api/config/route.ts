@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const file = await fs.readFile(process.cwd() + "/app/data/imported.json", "utf8")
+    const file = await fs.readFile(process.cwd() + "/app/data/config.json", "utf8")
     const data = JSON.parse(file)
     return NextResponse.json(data)
   } catch (error) {

@@ -12,7 +12,7 @@ import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, Crosshair, Save, Move3D } from "lucide-react"
 import { toast } from "sonner"
-
+import { ConfirmDialog } from "@/components/confirm-dialog"
 export default function Home() {
   const [config, setConfig] = useState(null)
   const [selectedCamera, setSelectedCamera] = useState("")
@@ -100,13 +100,6 @@ export default function Home() {
       return
     }
 
-    // Add confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to update the configuration?\n\nCamera: ${selectedCamera}\nLandmark: ${selectedLandmark}\nPan: ${panValue}\nTilt: ${tiltValue}`
-    )
-
-    if (!confirmed) return
-
     try {
       const response = await fetch("/api/update", {
         method: "POST",
@@ -187,23 +180,6 @@ export default function Home() {
     }
   }
 
-  const handleSaveConfig = async () => {
-    setSaveStatus("loading")
-    try {
-      const response = await fetch("/api/format", {
-        method: "POST"
-      })
-      
-      if (!response.ok) throw new Error("Save failed")
-      setSaveStatus("success")
-      setTimeout(() => setSaveStatus("idle"), 2000)
-    } catch (error) {
-      console.error("Save error:", error)
-      setSaveStatus("error")
-      setTimeout(() => setSaveStatus("idle"), 2000)
-    }
-  }
-
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="z-10 w-full max-w-4xl space-y-8">
@@ -231,16 +207,23 @@ export default function Home() {
                 Recenter
               </Button>
             </div>
-            <Button 
-              onClick={handleSaveConfig}
-              disabled={saveStatus === "loading"}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saveStatus === "loading" ? "Saving..." : 
+
+            <ConfirmDialog
+              title="Save Configuration"
+              description={<div>
+                <h4 className="font-bold">Are you sure you want to save the configuration?</h4>
+                <br/>
+                <p>Camera: {selectedCamera}</p>
+                <p>Landmark: {selectedLandmark}</p>
+                <p>Pan: {panValue}</p>
+                <p>Tilt: {tiltValue}</p>
+              </div>}
+              onConfirm={handleUpdate}
+              onCancel={() => {}}
+              triggerText={saveStatus === "loading" ? "Saving..." : 
                saveStatus === "success" ? "Saved!" :
                saveStatus === "error" ? "Error!" : "Save Configuration"}
-            </Button>
+            />
           </CardContent>
         </Card>
 

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     JSON.parse(content)
 
     // Write to imported.json instead of config.json
-    await fs.writeFile(process.cwd() + "/app/data/imported.json", content)
+    await fs.writeFile(process.cwd() + "/app/data/config.json", content)
 
     return NextResponse.json({ success: true })
   } catch (error) {
