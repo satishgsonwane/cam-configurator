@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, Crosshair, Save, Move3D } from "lucide-react"
+import { Upload, Crosshair, Save, Move3D, Download } from "lucide-react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 export default function Home() {
@@ -100,6 +100,7 @@ export default function Home() {
       return
     }
 
+    setSaveStatus("loading")
     try {
       const response = await fetch("/api/update", {
         method: "POST",
@@ -111,14 +112,29 @@ export default function Home() {
           tilt: Number(tiltValue),
         }),
       })
+
       if (!response.ok) throw new Error("Failed to update configuration")
-      toast.success("Configuration updated successfully")
-      // Refresh the configuration
-      const updatedConfig = await fetch("/api/config").then((res) => res.json())
-      setConfig(updatedConfig)
+      
+      const data = await response.json()
+      if (data.success) {
+        // Refresh the configuration from the updated blob
+        const updatedConfig = await fetch("/api/config").then((res) => res.json())
+        setConfig(updatedConfig)
+        
+        toast.success("Configuration updated successfully")
+        setSaveStatus("success")
+      } else {
+        throw new Error("Failed to update configuration")
+      }
     } catch (error) {
       console.error("Error updating configuration:", error)
       toast.error("Failed to update configuration")
+      setSaveStatus("error")
+    } finally {
+      // Reset save status after a delay
+      setTimeout(() => {
+        setSaveStatus("idle")
+      }, 2000)
     }
   }
 
@@ -180,6 +196,33 @@ export default function Home() {
     }
   }
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch("/api/config")
+      const config = await response.json()
+      
+      // Create blob from config
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      
+      // Create temporary link and trigger download
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'config.json'
+      document.body.appendChild(link)
+      link.click()
+      
+      // Cleanup
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success("Configuration downloaded successfully")
+    } catch (error) {
+      console.error("Error downloading configuration:", error)
+      toast.error("Failed to download configuration")
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="z-10 w-full max-w-4xl space-y-8">
@@ -197,6 +240,14 @@ export default function Home() {
               >
                 <Upload className="h-4 w-4 text-blue-600" />
                 Import Config
+              </Button>
+              <Button 
+                onClick={handleDownload}
+                variant="outline"
+                className="gap-2 bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400 transition-colors font-semibold"
+              >
+                <Download className="h-4 w-4 text-green-600" />
+                Export Config
               </Button>
               <Button 
                 onClick={handleReset} 
