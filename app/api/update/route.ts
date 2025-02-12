@@ -1,6 +1,16 @@
 import { put, list, del } from "@vercel/blob"
 import { NextResponse } from "next/server"
 
+interface CameraConfig {
+  camera_id: string;
+  name?: string;
+  calibration_data: Record<string, [number, number]>;
+}
+
+interface Config {
+  camera_config: CameraConfig[];
+}
+
 export async function POST(req: Request) {
   const { camera, landmark, pan, tilt } = await req.json()
 
@@ -13,7 +23,7 @@ export async function POST(req: Request) {
     const { blobs } = await list()
     const configBlob = blobs.find(blob => blob.pathname === 'config/config.json')
     
-    let config
+    let config: Config
     if (configBlob) {
       const response = await fetch(configBlob.url)
       config = await response.json()
@@ -22,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     // Update the configuration
-    const cameraConfig = config.camera_config.find((cam: { camera_id: string | number }) => cam.camera_id.toString() === camera)
+    const cameraConfig = config.camera_config.find(cam => cam.camera_id.toString() === camera)
     if (!cameraConfig || !cameraConfig.calibration_data || !cameraConfig.calibration_data[landmark]) {
       return NextResponse.json({ error: "Invalid camera or landmark" }, { status: 400 })
     }
@@ -40,7 +50,7 @@ export async function POST(req: Request) {
     // Verify the update
     const verifyResponse = await fetch(url)
     const verifiedConfig = await verifyResponse.json()
-    const verifiedCamera = verifiedConfig.camera_config.find((cam: { camera_id: string | number }) => cam.camera_id.toString() === camera)
+    const verifiedCamera = verifiedConfig.camera_config.find(cam => cam.camera_id.toString() === camera)
     
     if (!verifiedCamera || 
         !verifiedCamera.calibration_data || 
