@@ -31,10 +31,32 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
 
   useEffect(() => {
-    fetch("/api/config")
-      .then((response) => response.json())
-      .then((data) => setConfig(data))
-  }, [])
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch("/api/config")
+        if (!response.ok) throw new Error("Failed to fetch configuration")
+        const data = await response.json()
+        setConfig(data)
+        
+        // If there's a selected camera and landmark, load their values
+        if (selectedCamera && selectedLandmark && data?.camera_config) {
+          const camera = data.camera_config.find(
+            (cam) => cam.camera_id.toString() === selectedCamera
+          )
+          if (camera?.calibration_data?.[selectedLandmark]) {
+            const [pan, tilt] = camera.calibration_data[selectedLandmark]
+            setPanValue(pan.toString())
+            setTiltValue(tilt.toString())
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching config:", error)
+        toast.error("Failed to fetch configuration")
+      }
+    }
+
+    fetchConfig()
+  }, [selectedCamera, selectedLandmark]) // Re-fetch when camera or landmark changes
 
   const validatePan = (value: string) => {
     const pan = Number(value)

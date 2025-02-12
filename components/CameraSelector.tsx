@@ -1,28 +1,40 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
-export default function CameraSelector({ config, selectedCamera, setSelectedCamera, setSelectedLandmark }) {
-  if (!config || !config.camera_config) return null
+interface CameraConfig {
+  camera_id: string;
+  name?: string;
+  calibration_data: Record<string, [number, number]>;
+}
 
-  const handleCameraChange = (value) => {
-    setSelectedCamera(value)
-    setSelectedLandmark("")
+interface Props {
+  config: { camera_config: CameraConfig[] } | null;
+  selectedCamera: string;
+  setSelectedCamera: (camera: string) => void;
+  setSelectedLandmark: (landmark: string) => void;
+}
+
+export default function CameraSelector({ config, selectedCamera, setSelectedCamera, setSelectedLandmark }: Props) {
+  const handleCameraChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCamera(event.target.value)
+    setSelectedLandmark("") // Reset landmark when camera changes
   }
 
   return (
-    <div>
-      <label className="block mb-2">Select Camera:</label>
-      <Select value={selectedCamera} onValueChange={handleCameraChange}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select a camera" />
-        </SelectTrigger>
-        <SelectContent>
-          {config.camera_config.map((camera) => (
-            <SelectItem key={camera.camera_id} value={camera.camera_id.toString()}>
-              Camera {camera.camera_id}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="space-y-2">
+      <Label htmlFor="camera">Camera</Label>
+      <select
+        id="camera"
+        value={selectedCamera}
+        onChange={handleCameraChange}
+        className="w-full p-2 border rounded-md"
+      >
+        <option value="">Select Camera</option>
+        {config?.camera_config.map((camera) => (
+          <option key={camera.camera_id} value={camera.camera_id}>
+            {camera.name || `Camera ${camera.camera_id}`}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }
