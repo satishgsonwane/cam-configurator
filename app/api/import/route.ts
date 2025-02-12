@@ -1,28 +1,35 @@
+import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
-import { promises as fs } from "fs"
 
 export async function POST(req: Request) {
-  const formData = await req.formData()
-  const file = formData.get("file") as File
-
-  if (!file) {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 })
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const content = buffer.toString()
-
   try {
-    // Parse the uploaded JSON to validate it
-    JSON.parse(content)
+    const formData = await req.formData()
+    const file = formData.get("file") as File
+    
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 })
+    }
 
-    // Write to imported.json instead of config.json
-    await fs.writeFile(process.cwd() + "/app/data/config.json", content)
+    // Read the file content
+    const fileContent = await file.text()
+    
+    // Validate JSON format
+    try {
+      JSON.parse(fileContent)
+    } catch (e) {
+      return NextResponse.json({ error: "Invalid JSON format" }, { status: 400 })
+    }
 
-    return NextResponse.json({ success: true })
+    // Store in blob storage
+    const { url } = await put('config/config.json', fileContent, {
+      access: 'public',
+      addRandomSuffix: false,
+    })
+
+    return NextResponse.json({ success: true, url })
   } catch (error) {
-    console.error("Error importing configuration:", error)
-    return NextResponse.json({ error: "Invalid JSON file" }, { status: 400 })
+    console.error("Error importing config:", error)
+    return NextResponse.json({ error: "Failed to import configuration" }, { status: 500 })
   }
 }
 

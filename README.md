@@ -32,7 +32,8 @@ A web-based utility for calibrating and controlling camera positions in a sports
   - Shadcn/ui Components
   - Sonner for Toast Notifications
 
-- **API**
+- **Backend**
+  - Vercel Blob Storage for configuration persistence
   - REST API endpoints for configuration management
   - NATS messaging for camera control
 

@@ -1,14 +1,23 @@
-import { promises as fs } from "fs"
+import { list } from "@vercel/blob"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const file = await fs.readFile(process.cwd() + "/app/data/config.json", "utf8")
-    const data = JSON.parse(file)
-    return NextResponse.json(data)
+    const { blobs } = await list()
+    const configBlob = blobs.find(blob => blob.pathname === 'config/config.json')
+    
+    if (!configBlob) {
+      // Return default config if no blob exists
+      return NextResponse.json({ camera_config: [] })
+    }
+
+    const response = await fetch(configBlob.url)
+    const config = await response.json()
+    
+    return NextResponse.json(config)
   } catch (error) {
-    console.error("Error reading config file:", error)
-    return NextResponse.json({ error: "Failed to read configuration" }, { status: 500 })
+    console.error("Error fetching config:", error)
+    return NextResponse.json({ error: "Failed to fetch configuration" }, { status: 500 })
   }
 }
 

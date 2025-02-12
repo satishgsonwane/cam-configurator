@@ -1,4 +1,4 @@
-import { promises as fs } from "fs"
+import { put, list, del } from "@vercel/blob"
 import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
@@ -9,9 +9,19 @@ export async function POST(req: Request) {
   }
 
   try {
-    const file = await fs.readFile(process.cwd() + "/app/data/config.json", "utf8")
-    const config = JSON.parse(file)
+    // Get existing config from blob storage
+    const { blobs } = await list()
+    const configBlob = blobs.find(blob => blob.pathname === 'config/config.json')
+    
+    let config
+    if (configBlob) {
+      const response = await fetch(configBlob.url)
+      config = await response.json()
+    } else {
+      config = { camera_config: [] }
+    }
 
+    // Update the configuration
     const cameraConfig = config.camera_config.find((cam) => cam.camera_id.toString() === camera)
     if (!cameraConfig || !cameraConfig.calibration_data || !cameraConfig.calibration_data[landmark]) {
       return NextResponse.json({ error: "Invalid camera or landmark" }, { status: 400 })
@@ -19,11 +29,15 @@ export async function POST(req: Request) {
 
     cameraConfig.calibration_data[landmark] = [pan, tilt]
 
-    await fs.writeFile(process.cwd() + "/app/data/config.json", JSON.stringify(config, null, 2))
+    // Store updated config in blob storage
+    const { url } = await put('config/config.json', JSON.stringify(config, null, 2), {
+      access: 'public',
+      addRandomSuffix: false, // Keep the same filename
+    })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, url })
   } catch (error) {
-    console.error("Error updating config file:", error)
+    console.error("Error updating config:", error)
     return NextResponse.json({ error: "Failed to update configuration" }, { status: 500 })
   }
 }
