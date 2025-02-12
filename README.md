@@ -39,7 +39,7 @@ A web-based utility for calibrating and controlling camera positions in a sports
 - **Backend**
   - Vercel Blob Storage for configuration persistence
   - REST API endpoints for configuration management
-  - NATS messaging for camera control
+  - PTZ Control API for camera operations
 
 ## Getting Started
 
@@ -108,3 +108,22 @@ The application includes comprehensive error handling:
 - Toast notifications for success/error feedback
 - Graceful error recovery
 - Network error handling
+
+## Security Notes
+
+- Ensure secure network connection to venue
+- Keep configuration files private
+- Validate all imported configurations
+- Monitor camera access logs
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+## License
+
+This project is proprietary software. All rights reserved.

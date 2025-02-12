@@ -1,41 +1,50 @@
 import { NextResponse } from "next/server"
-import { connect, StringCodec } from "nats"
 
 export async function POST(req: Request) {
-  const { camera, message } = await req.json()
+  const { camera, message, venue } = await req.json()
 
-  if (!camera || !message) {
+  if (!camera || !message || !venue) {
     return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
   }
 
   try {
-    // Connect to the venue's NATS server
-    const nc = await connect({ 
-      servers: process.env.NEXT_PUBLIC_NATS_SERVER,
-      timeout: 5000 // 5 second timeout
+    const myHeaders = new Headers()
+    myHeaders.append("Content-Type", "application/json")
+
+    // Construct the event name using the camera number
+    const eventName = `ptzcontrol.camera${camera}`
+
+    // Prepare the request body
+    const raw = JSON.stringify({
+      eventName,
+      eventData: {
+        pansetpoint: message.pansetpoint,
+        tiltsetpoint: message.tiltsetpoint,
+        zoomsetpoint: message.zoomsetpoint
+      }
     })
-    const sc = StringCodec()
-    
-    // Match the topics used in the Flask app
-    const colourTopic = `colour-control.camera${camera}`
-    const ptzTopic = `ptzcontrol.camera${camera}`
-    
-    // Send the message multiple times as done in Flask app
-    const maxMessages = 5 // Matches Flask's default MAX_MESSAGES
-    for (let i = 0; i < maxMessages; i++) {
-      await nc.publish(colourTopic, sc.encode(JSON.stringify(message)))
-      await new Promise(resolve => setTimeout(resolve, 100)) // 100ms delay between messages
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow" as RequestRedirect
     }
 
-    // Send inquiry message
-    await nc.publish(ptzTopic, sc.encode(JSON.stringify({ "inqcam": camera })))
+    // Use the venue number in the API URL
+    const response = await fetch(`https://isproxy.ozapi.net/venue${venue}/engine/lut/nats`, requestOptions)
     
-    await nc.close()
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`)
+    }
+
+    const result = await response.text()
+    console.log("API Response:", result)
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error sending NATS message:", error)
-    return NextResponse.json({ error: "Failed to send NATS message" }, { status: 500 })
+    console.error("Error sending message:", error)
+    return NextResponse.json({ error: "Failed to send message" }, { status: 500 })
   }
 }
 

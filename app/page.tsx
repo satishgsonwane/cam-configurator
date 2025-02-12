@@ -37,6 +37,17 @@ export default function Home() {
 
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
 
+  const [venueNumber, setVenueNumber] = useState("13")
+
+  const validateVenue = (value: string) => {
+    const venue = Number(value)
+    if (isNaN(venue) || venue < 1) {
+      toast.error("Venue number must be a positive number")
+      return false
+    }
+    return true
+  }
+
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -98,7 +109,7 @@ export default function Home() {
   const handleMove = async () => {
     if (!selectedCamera || !selectedLandmark) return
 
-    if (!validatePan(panValue) || !validateTilt(tiltValue) || !validateZoom(zoomValue)) {
+    if (!validatePan(panValue) || !validateTilt(tiltValue) || !validateZoom(zoomValue) || !validateVenue(venueNumber)) {
       return
     }
 
@@ -112,9 +123,13 @@ export default function Home() {
       const response = await fetch("/api/move", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ camera: selectedCamera, message }),
+        body: JSON.stringify({ 
+          camera: selectedCamera, 
+          message,
+          venue: venueNumber 
+        }),
       })
-      if (!response.ok) throw new Error("Failed to send NATS message")
+      if (!response.ok) throw new Error("Failed to send move command")
       toast.success("Move command sent successfully")
     } catch (error) {
       console.error("Error sending move command:", error)
@@ -203,7 +218,7 @@ export default function Home() {
   }
 
   const handleReset = async () => {
-    if (!selectedCamera) return
+    if (!selectedCamera || !validateVenue(venueNumber)) return
 
     // Update the input fields
     setPanValue("0")
@@ -220,7 +235,11 @@ export default function Home() {
       const response = await fetch("/api/move", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ camera: selectedCamera, message }),
+        body: JSON.stringify({ 
+          camera: selectedCamera, 
+          message,
+          venue: venueNumber 
+        }),
       })
       if (!response.ok) throw new Error("Failed to send reset command")
       toast.success("Reset command sent successfully")
@@ -365,6 +384,26 @@ export default function Home() {
                 <CardTitle>Camera Selection</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Label className="text-sm font-medium cursor-help">Venue Number</Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Enter the venue number for camera control (e.g., 13)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Input
+                    type="number"
+                    value={venueNumber}
+                    onChange={(e) => setVenueNumber(e.target.value)}
+                    placeholder="Enter venue number"
+                    className="w-full"
+                  />
+                </div>
+                
                 <CameraSelector
                   config={config}
                   selectedCamera={selectedCamera}
