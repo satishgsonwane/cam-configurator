@@ -19,6 +19,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Switch } from "@/components/ui/switch"
+
+type CrosshairData = {
+  type: "crosshair";
+  x: number;
+  y: number;
+  color: string;
+}
 
 export default function Home() {
   const [config, setConfig] = useState(null)
@@ -38,6 +46,8 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
 
   const [venueNumber, setVenueNumber] = useState("13")
+
+  const [visualizationMode, setVisualizationMode] = useState(false)
 
   const validateVenue = (value: string) => {
     const venue = Number(value)
@@ -75,6 +85,15 @@ export default function Home() {
 
     fetchConfig()
   }, [selectedCamera, selectedLandmark]) // Re-fetch when camera or landmark changes
+
+  useEffect(() => {
+    return () => {
+      // Cleanup visualization when component unmounts
+      if (visualizationMode) {
+        handleVisualization(false)
+      }
+    }
+  }, []) // Empty dependency array for unmount only
 
   const validatePan = (value: string) => {
     const pan = Number(value)
@@ -276,6 +295,50 @@ export default function Home() {
     }
   }
 
+  const handleVisualization = async (enabled: boolean) => {
+    if (!config?.camera_config || !validateVenue(venueNumber)) {
+      toast.error("Please import config and set valid venue first")
+      setVisualizationMode(false)
+      return
+    }
+
+    try {
+      // Create eventData for all cameras
+      const eventData: Record<string, CrosshairData[]> = {}
+      config.camera_config.forEach(camera => {
+        eventData[`/camera${camera.camera_id}`] = enabled ? [
+          {
+            type: "crosshair",
+            x: 0.5,
+            y: 0.5,
+            color: "FF0000"
+          }
+        ] : []
+      })
+
+      const response = await fetch(`https://isproxy.ozapi.net/venue${venueNumber}/engine/lut/nats`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          eventName: "annotationgraphicspercamera",
+          eventData
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update visualization")
+      }
+
+      toast.success(enabled ? "Visualization enabled for all cameras" : "Visualization disabled for all cameras")
+    } catch (error) {
+      console.error("Error toggling visualization:", error)
+      toast.error("Failed to toggle visualization")
+      setVisualizationMode(false)
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center p-4 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="z-10 w-full space-y-2">
@@ -301,6 +364,29 @@ export default function Home() {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Import config json to check and edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        id="visualization-mode"
+                        checked={visualizationMode}
+                        onCheckedChange={(checked) => {
+                          setVisualizationMode(checked)
+                          handleVisualization(checked)
+                        }}
+                      />
+                      <Label htmlFor="visualization-mode" className="text-sm font-medium cursor-help">
+                        Visualization
+                      </Label>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Toggle visualization mode</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
