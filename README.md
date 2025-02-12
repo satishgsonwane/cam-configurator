@@ -39,6 +39,7 @@ A web-based utility for calibrating and controlling camera positions in a sports
 ## Getting Started
 
 1. **Preparation**
+   
    Make sure you are tunneled into the venue before using this utility.
    
 2. **Installation**
