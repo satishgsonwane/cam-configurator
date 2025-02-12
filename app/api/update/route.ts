@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     // Update the configuration
-    const cameraConfig = config.camera_config.find((cam) => cam.camera_id.toString() === camera)
+    const cameraConfig = config.camera_config.find((cam: { camera_id: string | number }) => cam.camera_id.toString() === camera)
     if (!cameraConfig || !cameraConfig.calibration_data || !cameraConfig.calibration_data[landmark]) {
       return NextResponse.json({ error: "Invalid camera or landmark" }, { status: 400 })
     }
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     // Verify the update
     const verifyResponse = await fetch(url)
     const verifiedConfig = await verifyResponse.json()
-    const verifiedCamera = verifiedConfig.camera_config.find((cam) => cam.camera_id.toString() === camera)
+    const verifiedCamera = verifiedConfig.camera_config.find((cam: { camera_id: string | number }) => cam.camera_id.toString() === camera)
     
     if (!verifiedCamera || 
         !verifiedCamera.calibration_data || 
