@@ -334,7 +334,7 @@ export default function Home() {
               <CardTitle className="text-lg">Field Visualization</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-center p-4">
-              <div className="relative w-full h-[650px]">
+              <div className="relative w-full h-[500px]">
                 <Image
                   src="/field.png"
                   alt="Football field layout"
