@@ -288,21 +288,32 @@ export default function Home() {
             </div>
 
             <div className="flex gap-4">
-              <ConfirmDialog
-                title="Download Configuration"
-                description={
-                  <div>
-                    <h4 className="font-bold">Download the current configuration?</h4>
-                    <br/>
-                    <p>This will download the current state of the configuration as a JSON file.</p>
-                  </div>
-                }
-                onConfirm={handleDownload}
-                onCancel={() => {}}
-                triggerText="Download Config"
-                triggerClassName="gap-2 bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400 transition-colors font-semibold"
-                triggerIcon={<Download className="h-4 w-4 text-green-600" />}
-              />
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <ConfirmDialog
+                        title="Download Configuration"
+                        description={
+                          <div>
+                            <h4 className="font-bold">Download the current configuration?</h4>
+                            <br/>
+                            <p>This will download the current state of the configuration as a JSON file.</p>
+                          </div>
+                        }
+                        onConfirm={handleDownload}
+                        onCancel={() => {}}
+                        triggerText="Download Config"
+                        triggerClassName="gap-2 bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400 transition-colors font-semibold"
+                        triggerIcon={<Download className="h-4 w-4 text-green-600" />}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Download current configuration as JSON</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
               <ConfirmDialog
                 title="Save Configuration"
