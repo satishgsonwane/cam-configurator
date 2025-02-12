@@ -11,6 +11,7 @@ import { AlertCircle } from "lucide-react"
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, Crosshair, Save, Move3D } from "lucide-react"
+import { toast } from "sonner"
 
 export default function Home() {
   const [config, setConfig] = useState(null)
@@ -85,10 +86,10 @@ export default function Home() {
         body: JSON.stringify({ camera: selectedCamera, message }),
       })
       if (!response.ok) throw new Error("Failed to send NATS message")
-      alert("Move command sent successfully")
+      toast.success("Move command sent successfully")
     } catch (error) {
       console.error("Error sending move command:", error)
-      alert("Failed to send move command")
+      toast.error("Failed to send move command")
     }
   }
 
@@ -118,13 +119,13 @@ export default function Home() {
         }),
       })
       if (!response.ok) throw new Error("Failed to update configuration")
-      alert("Configuration updated successfully")
+      toast.success("Configuration updated successfully")
       // Refresh the configuration
       const updatedConfig = await fetch("/api/config").then((res) => res.json())
       setConfig(updatedConfig)
     } catch (error) {
       console.error("Error updating configuration:", error)
-      alert("Failed to update configuration")
+      toast.error("Failed to update configuration")
     }
   }
 
@@ -133,7 +134,7 @@ export default function Home() {
     if (!fileInputRef.current?.files) return
     const file = fileInputRef.current.files[0]
     if (!file) {
-      alert("Please select a file to import")
+      toast.error("Please select a file to import")
       return
     }
 
@@ -148,13 +149,13 @@ export default function Home() {
 
       if (!response.ok) throw new Error("Failed to import configuration")
 
-      alert("Configuration imported successfully")
+      toast.success("Configuration imported successfully")
       // Refresh the configuration
       const updatedConfig = await fetch("/api/config").then((res) => res.json())
       setConfig(updatedConfig)
     } catch (error) {
       console.error("Error importing configuration:", error)
-      alert("Failed to import configuration")
+      toast.error("Failed to import configuration")
     }
   }
 
@@ -179,10 +180,10 @@ export default function Home() {
         body: JSON.stringify({ camera: selectedCamera, message }),
       })
       if (!response.ok) throw new Error("Failed to send reset command")
-      alert("Reset command sent successfully")
+      toast.success("Reset command sent successfully")
     } catch (error) {
       console.error("Error sending reset command:", error)
-      alert("Failed to send reset command")
+      toast.error("Failed to send reset command")
     }
   }
 
