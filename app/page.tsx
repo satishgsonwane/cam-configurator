@@ -49,6 +49,8 @@ export default function Home() {
 
   const [visualizationMode, setVisualizationMode] = useState(false)
 
+  const [enclosureOpen, setEnclosureOpen] = useState(false)
+
   const validateVenue = (value: string) => {
     const venue = Number(value)
     if (isNaN(venue) || venue < 1) {
@@ -466,8 +468,27 @@ export default function Home() {
           <div className="space-y-6">
             {/* Camera Selection Card */}
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between pr-6">
                 <CardTitle>Camera Selection</CardTitle>
+                <TooltipProvider>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="enclosure-control"
+                          checked={enclosureOpen}
+                          onCheckedChange={setEnclosureOpen}
+                        />
+                        <Label htmlFor="enclosure-control" className="text-sm font-medium cursor-help">
+                          Enclosure {enclosureOpen ? 'Open' : 'Closed'}
+                        </Label>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Toggle camera enclosure open/close</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
