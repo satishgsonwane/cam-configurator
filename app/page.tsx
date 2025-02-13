@@ -341,6 +341,51 @@ export default function Home() {
     }
   }
 
+  const handleEnclosure = async (open: boolean) => {
+    if (!config?.camera_config || !validateVenue(venueNumber)) {
+      toast.error("Please import config and set valid venue first")
+      setEnclosureOpen(false)
+      return
+    }
+
+    try {
+      // Map camera IDs to the correct IP range (41-46)
+      const cameraIPs = config.camera_config
+        .map(camera => {
+          const cameraNumber = parseInt(camera.camera_id)
+          if (isNaN(cameraNumber)) return null
+          return `192.168.67.${40 + cameraNumber}` // Maps camera 1 to .41, 2 to .42, etc.
+        })
+        .filter((ip): ip is string => Boolean(ip))
+
+      if (cameraIPs.length === 0) {
+        throw new Error("No valid camera IPs found in config")
+      }
+
+      const response = await fetch("/api/enclosure", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          action: open ? 'open' : 'close',
+          venue: venueNumber,
+          cameraIPs
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${open ? 'open' : 'close'} enclosures`)
+      }
+
+      toast.success(`All enclosures ${open ? 'opened' : 'closed'} successfully`)
+    } catch (error) {
+      console.error("Error controlling enclosures:", error)
+      toast.error(error.message || `Failed to ${open ? 'open' : 'close'} enclosures`)
+      setEnclosureOpen(!open) // Revert switch state on error
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center p-4 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="z-10 w-full space-y-2">
@@ -477,7 +522,10 @@ export default function Home() {
                         <Switch
                           id="enclosure-control"
                           checked={enclosureOpen}
-                          onCheckedChange={setEnclosureOpen}
+                          onCheckedChange={(checked) => {
+                            setEnclosureOpen(checked)
+                            handleEnclosure(checked)
+                          }}
                         />
                         <Label htmlFor="enclosure-control" className="text-sm font-medium cursor-help">
                           Enclosure {enclosureOpen ? 'Open' : 'Closed'}
