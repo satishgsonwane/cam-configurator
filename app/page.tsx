@@ -28,8 +28,29 @@ type CrosshairData = {
   color: string;
 }
 
+type Config = {
+  camera_config: CameraConfig[];
+}
+
+type CameraConfig = {
+  camera_id: string;
+  ip?: string;
+  name?: string;
+  calibration_data?: Record<string, [number, number]>;
+}
+
+type ErrorWithMessage = {
+  message: string;
+}
+
+type EnclosureRequest = {
+  action: 'open' | 'close';
+  venue: string;
+  cameraIPs: string[];
+}
+
 export default function Home() {
-  const [config, setConfig] = useState(null)
+  const [config, setConfig] = useState<Config | null>(null)
   const [selectedCamera, setSelectedCamera] = useState("")
   const [selectedLandmark, setSelectedLandmark] = useState("")
   const [panValue, setPanValue] = useState("")
@@ -71,7 +92,7 @@ export default function Home() {
         // If there's a selected camera and landmark, load their values
         if (selectedCamera && selectedLandmark && data?.camera_config) {
           const camera = data.camera_config.find(
-            (cam) => cam.camera_id.toString() === selectedCamera
+            (cam: CameraConfig) => cam.camera_id.toString() === selectedCamera
           )
           if (camera?.calibration_data?.[selectedLandmark]) {
             const [pan, tilt] = camera.calibration_data[selectedLandmark]
@@ -80,8 +101,9 @@ export default function Home() {
           }
         }
       } catch (error) {
-        console.error("Error fetching config:", error)
-        toast.error("Failed to fetch configuration")
+        const err = error as ErrorWithMessage
+        console.error("Error fetching config:", err)
+        toast.error(err.message || "Failed to fetch configuration")
       }
     }
 
@@ -199,7 +221,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error updating configuration:", error)
-      toast.error(error.message || "Failed to update configuration")
+      const err = error as ErrorWithMessage
+      toast.error(err.message || "Failed to update configuration")
       setSaveStatus("error")
     } finally {
       setTimeout(() => {
@@ -307,7 +330,7 @@ export default function Home() {
     try {
       // Create eventData for all cameras
       const eventData: Record<string, CrosshairData[]> = {}
-      config.camera_config.forEach(camera => {
+      config.camera_config.forEach((camera: CameraConfig) => {
         eventData[`/camera${camera.camera_id}`] = enabled ? [
           {
             type: "crosshair",
@@ -351,12 +374,12 @@ export default function Home() {
     try {
       // Map camera IDs to the correct IP range (41-46)
       const cameraIPs = config.camera_config
-        .map(camera => {
+        .map((camera: CameraConfig) => {
           const cameraNumber = parseInt(camera.camera_id)
           if (isNaN(cameraNumber)) return null
           return `192.168.${54+ +venueNumber}.${40 + cameraNumber}` // Maps camera 1 to .41, 2 to .42, etc.
         })
-        .filter((ip): ip is string => Boolean(ip))
+        .filter((ip: string | null): ip is string => Boolean(ip))
 
       if (cameraIPs.length === 0) {
         throw new Error("No valid camera IPs found in config")
@@ -380,8 +403,9 @@ export default function Home() {
 
       toast.success(`All enclosures ${open ? 'opened' : 'closed'} successfully`)
     } catch (error) {
-      console.error("Error controlling enclosures:", error)
-      toast.error(error.message || `Failed to ${open ? 'open' : 'close'} enclosures`)
+      const err = error as ErrorWithMessage
+      console.error("Error controlling enclosures:", err)
+      toast.error(err.message || `Failed to ${open ? 'open' : 'close'} enclosures`)
       setEnclosureOpen(!open) // Revert switch state on error
     }
   }
@@ -527,8 +551,8 @@ export default function Home() {
                             handleEnclosure(checked)
                           }}
                         />
-                        <Label htmlFor="enclosure-control" className="text-sm font-medium cursor-help">
-                          Enclosure {enclosureOpen ? 'Open' : 'Closed'}
+                        <Label htmlFor="enclosure-control" className="text-sm font-medium cursor-pointer">
+                          {enclosureOpen ? 'Close Enclosures' : 'Open Enclosures'}
                         </Label>
                       </div>
                     </TooltipTrigger>
@@ -560,13 +584,13 @@ export default function Home() {
                 </div>
                 
                 <CameraSelector
-                  config={config}
+                  config={config as any}
                   selectedCamera={selectedCamera}
                   setSelectedCamera={setSelectedCamera}
                   setSelectedLandmark={setSelectedLandmark}
                 />
                 <LandmarkSelector
-                  config={config}
+                  config={config as any}
                   selectedCamera={selectedCamera}
                   selectedLandmark={selectedLandmark}
                   setSelectedLandmark={setSelectedLandmark}
