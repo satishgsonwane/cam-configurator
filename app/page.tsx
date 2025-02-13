@@ -354,7 +354,7 @@ export default function Home() {
         .map(camera => {
           const cameraNumber = parseInt(camera.camera_id)
           if (isNaN(cameraNumber)) return null
-          return `192.168.67.${40 + cameraNumber}` // Maps camera 1 to .41, 2 to .42, etc.
+          return `192.168.${54+ +venueNumber}.${40 + cameraNumber}` // Maps camera 1 to .41, 2 to .42, etc.
         })
         .filter((ip): ip is string => Boolean(ip))
 
