@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, Crosshair, Save, Move3D, Download } from "lucide-react"
+import { Upload, Crosshair, Save, Move3D, Download, Lock, Unlock } from "lucide-react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import {
@@ -543,22 +543,34 @@ export default function Home() {
                 <TooltipProvider>
                   <Tooltip delayDuration={0}>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          id="enclosure-control"
-                          checked={enclosureOpen}
-                          onCheckedChange={(checked) => {
-                            setEnclosureOpen(checked)
-                            handleEnclosure(checked)
-                          }}
-                        />
-                        <Label htmlFor="enclosure-control" className="text-sm font-medium cursor-pointer">
-                          {enclosureOpen ? 'Close Enclosures' : 'Open Enclosures'}
-                        </Label>
-                      </div>
+                      <Button
+                        onClick={() => {
+                          const newState = !enclosureOpen;
+                          setEnclosureOpen(newState);
+                          handleEnclosure(newState);
+                        }}
+                        variant="outline"
+                        className={`gap-2 transition-colors font-semibold ${
+                          enclosureOpen 
+                            ? "bg-red-100 hover:bg-red-200 text-red-600 border-red-300 hover:border-red-400" 
+                            : "bg-green-100 hover:bg-green-200 text-green-600 border-green-300 hover:border-green-400"
+                        }`}
+                      >
+                        {enclosureOpen ? (
+                          <>
+                            <Lock className="h-4 w-4" />
+                            Close Enclosures
+                          </>
+                        ) : (
+                          <>
+                            <Unlock className="h-4 w-4" />
+                            Open Enclosures
+                          </>
+                        )}
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Toggle camera enclosure open/close</p>
+                      <p>{enclosureOpen ? 'Close all camera enclosures' : 'Open all camera enclosures'}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
