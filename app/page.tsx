@@ -413,10 +413,6 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="z-10 w-full space-y-2">
-        <h1 className="text-4xl font-bold text-gray-900 ">Camera Calibration Utility</h1>
-        <h2 className="text-2xl font-bold text-gray-900 text-red-500">Start by importing relevant config first!</h2>
-        
-        {/* Action Buttons Card */}
         <Card>
           <CardContent className="flex justify-between p-4 gap-4">
             <div className="flex gap-4">
@@ -461,6 +457,11 @@ export default function Home() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+            </div>
+
+            <div className="text-center flex-grow">
+              <h1 className="text-2xl font-bold text-gray-900">Camera Calibration Utility</h1>
+              <h2 className="text-sm font-bold text-red-500">Start by importing relevant config first!</h2>
             </div>
 
             <div className="flex gap-4">
