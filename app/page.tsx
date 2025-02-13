@@ -576,7 +576,7 @@ export default function Home() {
                   className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg"
                 >
                   <Move3D className="h-5 w-5 mr-2" />
-                  Boom ! Bam!
+                  Take me there!
                 </Button>
               </CardContent>
             </Card>
