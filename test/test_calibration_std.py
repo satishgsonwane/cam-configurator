@@ -127,7 +127,6 @@ class Camera:
         tilt_delta_factors = []
         pan_offsets = []
         tilt_offsets = []
-
         for landmark_pair in landmark_pairs:
             x1,y1 = self.landmarks[landmark_pair[0]]
             x2,y2 = self.landmarks[landmark_pair[1]]
@@ -135,26 +134,31 @@ class Camera:
             distance_cam_base_to_landmark2 = np.linalg.norm(np.array([x2,y2]) - self.camerapos)
             pt1 = self.xy_to_pt(np.array([[x1,y1]]))
             pt2 = self.xy_to_pt(np.array([[x2,y2]]))
-            theta_1 = self._get_theta(np.array([[x1,y1]]),distance_cam_base_to_landmark1)
-            theta_2 = self._get_theta(np.array([[x2,y2]]),distance_cam_base_to_landmark2)
-            phi_1 = np.rad2deg(np.arctan(distance_cam_base_to_landmark1/self.height))
-            phi_2 = np.rad2deg(np.arctan(distance_cam_base_to_landmark2/self.height))
-            pan_delta_factor = abs(theta_1 - theta_2)/abs(pt1[...,0] - pt2[...,0])
-            tilt_delta_factor = abs(phi_1 - phi_2)/abs(distance_cam_base_to_landmark1 - distance_cam_base_to_landmark2)
-            pan_offset = theta_1 - pt1[...,0]*pan_delta_factor
-            tilt_offset = phi_1 - pt1[...,1]*tilt_delta_factor
-            pan_delta_factors.append(pan_delta_factor)
-            tilt_delta_factors.append(tilt_delta_factor)
-            pan_offsets.append(pan_offset)
-            tilt_offsets.append(tilt_offset)
-
+            if abs(distance_cam_base_to_landmark1 - distance_cam_base_to_landmark2)>=0.01 and abs(pt1[...,0] - pt2[...,0])>=0.01:
+                theta_1 = self._get_theta(np.array([[x1,y1]]),distance_cam_base_to_landmark1)
+                theta_2 = self._get_theta(np.array([[x2,y2]]),distance_cam_base_to_landmark2)
+                phi_1 = np.rad2deg(np.arctan(distance_cam_base_to_landmark1/self.height))
+                phi_2 = np.rad2deg(np.arctan(distance_cam_base_to_landmark2/self.height))
+                pan_delta_factor = abs(theta_1 - theta_2)/abs(pt1[...,0] - pt2[...,0])
+                # if abs(distance_cam_base_to_landmark1 - distance_cam_base_to_landmark2)<=0.01:
+                #     print("pt1",pt1)
+                #     print("pt2",pt2)
+                #     print("theta_1",theta_1)
+                #     print("theta_2",theta_2)
+                #     print("landmark_pair",landmark_pair)
+                tilt_delta_factor = abs(phi_1 - phi_2)/abs(distance_cam_base_to_landmark1 - distance_cam_base_to_landmark2)
+                pan_offset = theta_1 - pt1[...,0]*pan_delta_factor
+                tilt_offset = phi_1 - pt1[...,1]*tilt_delta_factor
+                pan_delta_factors.append(pan_delta_factor)
+                tilt_delta_factors.append(tilt_delta_factor)
+                pan_offsets.append(pan_offset)
+                tilt_offsets.append(tilt_offset)
         # print(np.mean(pan_delta_factors),np.std(pan_delta_factors))
         # print(np.mean(tilt_delta_factors),np.std(tilt_delta_factors))
         # print(np.mean(pan_offsets),np.std(pan_offsets))
         # print(np.mean(tilt_offsets),np.std(tilt_offsets))
         return {"PAN_STD_1":np.std(pan_delta_factors),"TILT_STD_1":np.std(tilt_delta_factors),
                 "PAN_STD_2":np.std(pan_offsets),"TILT_STD_2":np.std(tilt_offsets)}
-        #check for pan_offset and tilt_offset and pan_delta_factor and tilt_delta_factor for various landmarks
         
     def _distances_from_side_lines(self):
         numerator = np.abs(np.dot(self.side_lines[:,:2],self.camerapos) + self.side_lines[:,2])
@@ -189,9 +193,6 @@ class Camera:
                 else:
                     theta = -(180 - abs(temp_theta))
             return theta
-       
-
-
     def _pan_tilt_limiter(self,pan,tilt):
         pan = max(min(pan,self.panrange[1]),self.panrange[0])
         tilt = max(min(tilt,self.tiltrange[1]),self.tiltrange[0])
