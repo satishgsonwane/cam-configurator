@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
+import { Progress } from "@/components/ui/progress"
 
 type CrosshairData = {
   type: "crosshair";
@@ -49,6 +50,25 @@ type EnclosureRequest = {
   cameraIPs: string[];
 }
 
+const getColorForValue = (value: number) => {
+  // Ensure value is between 0 and 10
+  const normalizedValue = Math.max(0, Math.min(10, value));
+  
+  // Calculate color components
+  if (normalizedValue <= 5) {
+    // Green to Yellow (0-5)
+    const ratio = normalizedValue / 5;
+    const red = Math.round(255 * ratio);
+    const green = 255;
+    return `rgb(${red}, ${green}, 0)`;
+  } else {
+    // Yellow to Red (5-10)
+    const ratio = (normalizedValue - 5) / 5;
+    const green = Math.round(255 * (1 - ratio));
+    return `rgb(255, ${green}, 0)`;
+  }
+};
+
 export default function Home() {
   const [config, setConfig] = useState<Config | null>(null)
   const [selectedCamera, setSelectedCamera] = useState("")
@@ -72,6 +92,11 @@ export default function Home() {
 
   const [enclosureOpen, setEnclosureOpen] = useState(false)
 
+  const [landmarkPtValues, setLandmarkPtValues] = useState<Record<string, { pan: number; tilt: number }>>({});
+  const [selectedVerificationLandmark, setSelectedVerificationLandmark] = useState("");
+  const [verificationPanValue, setVerificationPanValue] = useState("");
+  const [verificationTiltValue, setVerificationTiltValue] = useState("");
+
   const validateVenue = (value: string) => {
     const venue = Number(value)
     if (isNaN(venue) || venue < 1) {
@@ -79,6 +104,120 @@ export default function Home() {
       return false
     }
     return true
+  }
+
+  const [progressValues, setProgressValues] = useState({
+    pan1: 0,
+    pan2: 0,
+    tilt1: 0,
+    tilt2: 0
+  });
+
+  const handleTestCalibration = async () => {
+    if (!selectedCamera) {
+      toast.error("Please select a camera first")
+      return
+    }
+
+    try {
+      const response = await fetch("/api/test-calibration", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ selectedCamera }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to test calibration")
+      }
+
+      // Update progress values with raw standard deviation values
+      setProgressValues({
+        pan1: data.PAN_STD_1,
+        pan2: data.PAN_STD_2,
+        tilt1: data.TILT_STD_1,
+        tilt2: data.TILT_STD_2
+      })
+
+      toast.success("Calibration test completed")
+    } catch (error) {
+      console.error("Error testing calibration:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to test calibration")
+    }
+  }
+
+  const handleTestLandmarkPt = async () => {
+    if (!selectedCamera) {
+      toast.error("Please select a camera first")
+      return
+    }
+
+    try {
+      const response = await fetch("/api/test-landmark-pt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ selectedCamera }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to test landmark PT")
+      }
+
+      setLandmarkPtValues(data)
+      toast.success("Landmark PT test completed")
+    } catch (error) {
+      console.error("Error testing landmark PT:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to test landmark PT")
+    }
+  }
+
+  const handleVerificationLandmarkChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const landmark = event.target.value
+    setSelectedVerificationLandmark(landmark)
+    if (landmark && landmarkPtValues[landmark]) {
+      setVerificationPanValue(landmarkPtValues[landmark].pan.toString())
+      setVerificationTiltValue(landmarkPtValues[landmark].tilt.toString())
+    } else {
+      setVerificationPanValue("")
+      setVerificationTiltValue("")
+    }
+  }
+
+  const handleCheckPosition = async () => {
+    if (!selectedCamera || !selectedVerificationLandmark) {
+      toast.error("Please select a camera and landmark first")
+      return
+    }
+
+    const message = {
+      pansetpoint: Number(verificationPanValue),
+      tiltsetpoint: Number(verificationTiltValue),
+      zoomsetpoint: Number(zoomValue),
+    }
+
+    try {
+      const response = await fetch("/api/move", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          camera: selectedCamera, 
+          message,
+          venue: venueNumber 
+        }),
+      })
+      if (!response.ok) throw new Error("Failed to send move command")
+      toast.success("Move command sent successfully")
+    } catch (error) {
+      console.error("Error sending move command:", error)
+      toast.error("Failed to send move command")
+    }
   }
 
   useEffect(() => {
@@ -517,22 +656,90 @@ export default function Home() {
         {/* Main Content Area - Grid Layout */}
         <div className="grid grid-cols-2 gap-6">
           {/* Left Column - Field Visualization */}
-          <Card className="overflow-hidden h-full">
-            <CardHeader>
-              <CardTitle className="text-lg">Field Visualization</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-4">
-              <div className="relative w-full h-[500px]">
-                <Image
-                  src="/field.png"
-                  alt="Football field layout"
-                  fill
-                  className="object-contain rotate-0 scale-[1] transform-gpu"
-                  priority
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <Card className="overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-lg">Field Visualization</CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center p-4">
+                <div className="relative w-full h-[500px]">
+                  <Image
+                    src="/field.png"
+                    alt="Football field layout"
+                    fill
+                    className="object-contain rotate-0 scale-[1] transform-gpu"
+                    priority
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Test Calibration Section */}
+            <Card>
+              <CardContent className="space-y-6 p-6">
+                <Button 
+                  onClick={handleTestCalibration}
+                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  Test Calibration
+                </Button>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <Label>Pan_STD_1</Label>
+                      <span>{Number(progressValues.pan1).toFixed(3)}</span>
+                    </div>
+                    <div 
+                      className="h-2 rounded-full" 
+                      style={{
+                        backgroundColor: getColorForValue(progressValues.pan1)
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <Label>Pan_STD_2</Label>
+                      <span>{Number(progressValues.pan2).toFixed(3)}</span>
+                    </div>
+                    <div 
+                      className="h-2 rounded-full" 
+                      style={{
+                        backgroundColor: getColorForValue(progressValues.pan2)
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <Label>Tilt_STD_1</Label>
+                      <span>{Number(progressValues.tilt1).toFixed(3)}</span>
+                    </div>
+                    <div 
+                      className="h-2 rounded-full" 
+                      style={{
+                        backgroundColor: getColorForValue(progressValues.tilt1)
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <Label>Tilt_STD_2</Label>
+                      <span>{Number(progressValues.tilt2).toFixed(3)}</span>
+                    </div>
+                    <div 
+                      className="h-2 rounded-full" 
+                      style={{
+                        backgroundColor: getColorForValue(progressValues.tilt2)
+                      }}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Right Column - Camera Controls */}
           <div className="space-y-6">
@@ -686,10 +893,69 @@ export default function Home() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Calibration Verification Card */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pr-6">
+                <CardTitle className="text-lg">Calibration Verification</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  onClick={handleTestLandmarkPt}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Test Landmark PT
+                </Button>
+
+                <div className="space-y-2">
+                  <Label htmlFor="verification-landmark">Landmark</Label>
+                  <select
+                    id="verification-landmark"
+                    value={selectedVerificationLandmark}
+                    onChange={handleVerificationLandmarkChange}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="">Select Landmark</option>
+                    {Object.keys(landmarkPtValues).map((landmark) => (
+                      <option key={landmark} value={landmark}>
+                        Position {landmark}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Pan (°)</Label>
+                    <Input
+                      type="number"
+                      value={verificationPanValue}
+                      readOnly
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Tilt (°)</Label>
+                    <Input
+                      type="number"
+                      value={verificationTiltValue}
+                      readOnly
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleCheckPosition}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Check Position
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     </main>
   )
 }
-
+    
