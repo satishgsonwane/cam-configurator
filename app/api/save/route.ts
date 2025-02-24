@@ -13,7 +13,6 @@ export async function POST(req: Request) {
     
     // Write to both files
     await writeFile(configPath, configContent)
-    await writeFile(cameraConfigPath, configContent)
 
     return NextResponse.json({ success: true })
   } catch (error) {
