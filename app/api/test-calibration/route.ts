@@ -47,7 +47,7 @@ export async function POST(request: Request) {
           ...process.env,
           PYTHONPATH: process.env.PYTHONPATH || '',
           PYTHONHOME: undefined,
-          PATH: process.env.PATH
+          PATH: `${process.env.PATH}:/home/user/.local/bin`
         }
       })
 
