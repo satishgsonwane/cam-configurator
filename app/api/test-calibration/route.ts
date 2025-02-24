@@ -70,7 +70,10 @@ export async function POST(request: Request) {
               resolve(NextResponse.json({ error: 'Unable to determine missing module' }, { status: 500 }))
               return
             }
-            const missingModule = moduleMatch[1]
+            let missingModule = moduleMatch[1]
+            if (missingModule === 'cv2') {
+              missingModule = 'opencv-python'
+            }
             try {
               await installDependencies([missingModule])
               resolve(NextResponse.json({ message: `Installed missing module: ${missingModule}. Please retry the request.` }, { status: 500 }))
