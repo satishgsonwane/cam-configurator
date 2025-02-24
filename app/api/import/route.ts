@@ -1,5 +1,6 @@
-import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
+import { writeFile } from "fs/promises"
+import path from "path"
 
 export async function POST(req: Request) {
   try {
@@ -20,13 +21,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid JSON format" }, { status: 400 })
     }
 
-    // Store in blob storage
-    const { url } = await put('config/config.json', fileContent, {
-      access: 'public',
-      addRandomSuffix: false,
-    })
+    // Get the absolute path to the test/AI_configs directory
+    const configDir = path.join(process.cwd(), 'test', 'AI_configs')
+    
+    // Write both config files
+    await writeFile(path.join(configDir, 'config.json'), fileContent)
+    await writeFile(path.join(configDir, 'cameraconfig.json'), fileContent)
 
-    return NextResponse.json({ success: true, url })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error importing config:", error)
     return NextResponse.json({ error: "Failed to import configuration" }, { status: 500 })
