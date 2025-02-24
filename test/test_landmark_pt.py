@@ -11,10 +11,10 @@ except ImportError:
     from field_generator import generate_field_data
     from equations import get_line_equation,find_intersections
     
-# config_path =  os.path.join(os.path.dirname(os.getcwd()),"AI_configs","config.json")
-config_path = "/home/ozsports/Documents/WIP Code/cam-config-utility/test/AI_configs/config.json"
-# operation_settings_path = os.path.join(os.path.dirname(os.getcwd()),"AI_configs","cameraconfig.json")
-operation_settings_path = "/home/ozsports/Documents/WIP Code/cam-config-utility/test/AI_configs/cameraconfig.json"
+# Get the directory where the script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, "AI_configs", "config.json")
+operation_settings_path = os.path.join(script_dir, "AI_configs", "cameraconfig.json")
 
 def smooth_error(error, error_range=0.5, scale=2):
     error = np.clip(error, -error_range, error_range)
