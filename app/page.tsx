@@ -328,7 +328,7 @@ export default function Home() {
 
     setSaveStatus("loading")
     try {
-      const response = await fetch("/api/update", {
+      const response = await fetch("/api/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -434,17 +434,26 @@ export default function Home() {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch("/api/config")
-      const config = await response.json()
+      const response = await fetch("/api/download") // Updated endpoint to match the route
       
-      // Create blob from config
-      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to download configuration")
+      }
+      
+      // Get filename from Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition')
+      const filenameMatch = contentDisposition?.match(/filename="(.+)"/)
+      const filename = filenameMatch ? filenameMatch[1] : 'camera_calibration.json'
+      
+      const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       
       // Create temporary link and trigger download
       const link = document.createElement('a')
       link.href = url
-      link.download = 'config.json'
+      link.download = filename // Use filename from server
+      link.style.display = 'none' // Hide the link
       document.body.appendChild(link)
       link.click()
       
@@ -455,7 +464,7 @@ export default function Home() {
       toast.success("Configuration downloaded successfully")
     } catch (error) {
       console.error("Error downloading configuration:", error)
-      toast.error("Failed to download configuration")
+      toast.error(error instanceof Error ? error.message : "Failed to download configuration")
     }
   }
 
