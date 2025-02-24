@@ -17,20 +17,16 @@ export async function POST(request: Request) {
     }
 
     return new Promise((resolve) => {
-      // Use environment variables from the system
-      const env = {
-        ...process.env,
-        PYTHONPATH: process.env.PYTHONPATH || '',
-        PYTHONHOME: undefined, // Unset PYTHONHOME to use system Python
-        PATH: process.env.PATH
-      }
-
       const pythonProcess = spawn('/usr/bin/python3', [
         path.join(process.cwd(), 'test', 'test_calibration_std.py'),
         cameraId
       ], {
-        env,
-        stdio: ['pipe', 'pipe', 'pipe']
+        env: {
+          ...process.env,
+          PYTHONPATH: process.env.PYTHONPATH || '',
+          PYTHONHOME: undefined,
+          PATH: process.env.PATH
+        }
       })
 
       let output = ''

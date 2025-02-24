@@ -24,9 +24,8 @@ export async function POST(req: Request) {
     // Get the absolute path to the test/AI_configs directory
     const configDir = path.join(process.cwd(), 'test', 'AI_configs')
     
-    // Write both config files
+    // Write only to config.json
     await writeFile(path.join(configDir, 'config.json'), fileContent)
-    await writeFile(path.join(configDir, 'cameraconfig.json'), fileContent)
 
     return NextResponse.json({ success: true })
   } catch (error) {
