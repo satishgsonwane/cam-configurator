@@ -2,6 +2,28 @@ import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
 
+function installDependencies(dependencies: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const installProcess = spawn('/usr/bin/python3', ['-m', 'pip', 'install', ...dependencies])
+
+    installProcess.stdout.on('data', (data) => {
+      console.log(data.toString())
+    })
+
+    installProcess.stderr.on('data', (data) => {
+      console.error(data.toString())
+    })
+
+    installProcess.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error('Failed to install dependencies'))
+      } else {
+        resolve()
+      }
+    })
+  })
+}
+
 export async function POST(request: Request) {
   try {
     const { selectedCamera } = await request.json()
@@ -40,9 +62,24 @@ export async function POST(request: Request) {
         error += data.toString()
       })
 
-      pythonProcess.on('close', (code) => {
+      pythonProcess.on('close', async (code) => {
         if (code !== 0) {
-          resolve(NextResponse.json({ error: error || 'Test failed' }, { status: 500 }))
+          if (error.includes("ModuleNotFoundError")) {
+            const moduleMatch = error.match(/No module named '(\w+)'/)
+            if (!moduleMatch) {
+              resolve(NextResponse.json({ error: 'Unable to determine missing module' }, { status: 500 }))
+              return
+            }
+            const missingModule = moduleMatch[1]
+            try {
+              await installDependencies([missingModule])
+              resolve(NextResponse.json({ message: `Installed missing module: ${missingModule}. Please retry the request.` }, { status: 500 }))
+            } catch (installError) {
+              resolve(NextResponse.json({ error: 'Failed to install missing dependencies' }, { status: 500 }))
+            }
+          } else {
+            resolve(NextResponse.json({ error: error || 'Test failed' }, { status: 500 }))
+          }
         } else {
           try {
             const results = JSON.parse(output)
@@ -56,4 +93,4 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-} 
+}
