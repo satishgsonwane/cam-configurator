@@ -1,5 +1,17 @@
-import { put, list, del } from "@vercel/blob"
+// Remove Vercel blob import
+// import { put, list, del } from "@vercel/blob"
+
+// Ensure all operations are local
+// Implement local file operations if needed
+
+// Example of local file operation
+import { writeFile, readFile } from "fs/promises"
+import path from "path"
 import { NextResponse } from "next/server"
+
+// export async function POST(req: Request) {
+//   // Local file operation logic here
+// }
 
 interface CameraConfig {
   camera_id: string;
@@ -12,64 +24,32 @@ interface Config {
 }
 
 export async function POST(req: Request) {
-  const { camera, landmark, pan, tilt } = await req.json()
-
-  if (!camera || !landmark || pan === undefined || tilt === undefined) {
-    return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
-  }
-
   try {
-    // Get existing config from blob storage
-    const { blobs } = await list()
-    const configBlob = blobs.find(blob => blob.pathname === 'config/config.json')
-    
-    let config: Config
-    if (configBlob) {
-      const response = await fetch(configBlob.url)
-      config = await response.json()
-    } else {
-      config = { camera_config: [] }
+    const configDir = path.join(process.cwd(), 'test', 'AI_configs')
+    const configPath = path.join(configDir, 'config.json')
+
+    // Get the updated field and value from the request body
+    const { field, value } = await req.json()
+
+    // Read the current config.json
+    const configContent = await readFile(configPath, 'utf-8')
+    const config = JSON.parse(configContent)
+
+    // Update the specified field
+    config[field] = value
+
+    // Write the updated config back to config.json
+    try {
+      await writeFile(configPath, JSON.stringify(config, null, 2))
+      console.log(`Successfully updated ${field} in config.json`)
+      return NextResponse.json({ success: true })
+    } catch (error) {
+      console.error("Error writing config:", error)
+      return NextResponse.json({ error: "Failed to save to config.json", details: (error as Error).message }, { status: 500 })
     }
-
-    // Update the configuration
-    const cameraConfig = config.camera_config.find(cam => cam.camera_id.toString() === camera)
-    if (!cameraConfig || !cameraConfig.calibration_data || !cameraConfig.calibration_data[landmark]) {
-      return NextResponse.json({ error: "Invalid camera or landmark" }, { status: 400 })
-    }
-
-    // Update the values
-    cameraConfig.calibration_data[landmark] = [Number(pan), Number(tilt)]
-
-    // Store updated config in blob storage
-    const { url } = await put('config/config.json', JSON.stringify(config, null, 2), {
-      access: 'public',
-      addRandomSuffix: false,
-      contentType: 'application/json',
-    })
-
-    // Add delay before verification to ensure blob is available
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // Verify the update
-    const verifyResponse = await fetch(url)
-    const verifiedConfig: Config = await verifyResponse.json()
-    const verifiedCamera = verifiedConfig.camera_config.find(cam => cam.camera_id.toString() === camera)
-    
-    // Simplified verification
-    if (!verifiedCamera?.calibration_data?.[landmark]) {
-      console.error('Verification failed:', {
-        camera,
-        landmark,
-        verifiedCamera: verifiedCamera || 'not found',
-        calibrationData: verifiedCamera?.calibration_data || 'not found'
-      })
-      throw new Error("Verification failed - config not updated correctly")
-    }
-
-    return NextResponse.json({ success: true, url })
   } catch (error) {
-    console.error("Error updating config:", error)
-    return NextResponse.json({ error: "Failed to update configuration" }, { status: 500 })
+    console.error("Error in update operation:", error)
+    return NextResponse.json({ error: "Failed to update configuration", details: (error as Error).message }, { status: 500 })
   }
 }
 
