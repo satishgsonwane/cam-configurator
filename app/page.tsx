@@ -54,18 +54,16 @@ const getColorForValue = (value: number) => {
   // Ensure value is between 0 and 10
   const normalizedValue = Math.max(0, Math.min(10, value));
   
-  // Calculate color components
+  // Return specific colors based on value ranges
   if (normalizedValue <= 5) {
-    // Green to Yellow (0-5)
-    const ratio = normalizedValue / 5;
-    const red = Math.round(255 * ratio);
-    const green = 255;
-    return `rgb(${red}, ${green}, 0)`;
+    // Green for 0-5
+    return 'rgb(0, 255, 0)';
+  } else if (normalizedValue <= 7) {
+    // Yellow for 5-7
+    return 'orange'
   } else {
-    // Yellow to Red (5-10)
-    const ratio = (normalizedValue - 5) / 5;
-    const green = Math.round(255 * (1 - ratio));
-    return `rgb(255, ${green}, 0)`;
+    // Red for > 7
+    return 'rgb(255, 0, 0)';
   }
 };
 
