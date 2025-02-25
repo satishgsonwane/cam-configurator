@@ -4,7 +4,7 @@ import path from "path"
 
 export async function GET() {
   try {
-    const configPath = path.join(process.cwd(), 'test', 'AI_configs', 'config_modified.json')
+    const configPath = path.join(process.cwd(), 'home', 'ozer', 'AI', 'AI_configs', 'config_modified.json')
     
     try {
       const configContent = await readFile(configPath, 'utf-8')
