@@ -686,9 +686,9 @@ export default function Home() {
               <CardContent className="space-y-6 p-6">
                 <Button 
                   onClick={handleTestCalibration}
-                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                  className="w-full bg-yellow-400 hover:bg-yellow-600 text-black text-xl hover:text-white"
                 >
-                  Test Calibration
+                  Validate Calibration
                 </Button>
 
                 <div className="space-y-4">
@@ -893,7 +893,7 @@ export default function Home() {
 
                 <Button 
                   onClick={handleMove} 
-                  className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg"
+                  className="w-full bg-blue-700 text-white hover:bg-blue-500 h-12 text-lg hover:text-black"
                 >
                   <Move3D className="h-5 w-5 mr-2" />
                   Take me there!
@@ -909,9 +909,9 @@ export default function Home() {
               <CardContent className="space-y-4">
                 <Button 
                   onClick={handleTestLandmarkPt}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
-                  Test Landmark PT
+                  Calculate Landmark PT
                 </Button>
 
                 <div className="space-y-2">
@@ -953,7 +953,7 @@ export default function Home() {
 
                 <Button 
                   onClick={handleCheckPosition}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full bg-green-300 hover:bg-green-500 text-black hover:text-white"
                 >
                   Check Position
                 </Button>
