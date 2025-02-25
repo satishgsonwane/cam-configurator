@@ -690,73 +690,70 @@ export default function Home() {
                   Validate Calibration
                 </Button>
 
-                <div className="flex justify-around space-x-4">
-                  <div className="flex flex-col items-center space-y-2">
-                    <Label>Pan_STD_1</Label>
-                    <div 
-                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
-                    >
-                      <div 
-                        className="w-full rounded-md"
-                        style={{
-                          height: `${(progressValues.pan1 / 20) * 100}%`, // Adjust height based on 0-20 range
-                          backgroundColor: getColorForValue(progressValues.pan1)
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm">{Number(progressValues.pan1).toFixed(3)}</span>
+                {/* Grid Layout for Calibration Values */}
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  <div className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg">
+                      <span className="text-sm font-semibold">{Number(progressValues.pan1).toFixed(3)}</span>
+                      <div className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end">
+                        <div 
+                          className="w-full rounded-md"
+                          style={{
+                            height: `${(progressValues.pan1 / 20) * 100}%`, 
+                            backgroundColor: getColorForValue(progressValues.pan1)
+                          }}
+                        />
+                      </div>
+                    <Label className="text-xs text-gray-600">Pan_STD_1</Label>
                   </div>
 
-                  <div className="flex flex-col items-center space-y-2">
-                    <Label>Pan_STD_2</Label>
-                    <div 
-                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
-                    >
-                      <div 
-                        className="w-full rounded-md"
-                        style={{
-                          height: `${(progressValues.pan2 / 20) * 100}%`, // Adjust height based on 0-20 range
-                          backgroundColor: getColorForValue(progressValues.pan2)
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm">{Number(progressValues.pan2).toFixed(3)}</span>
-                  </div>
+{/* Pan_STD_2 */}
+<div className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg">
+        <span className="text-sm font-semibold">{Number(progressValues.pan2).toFixed(3)}</span>
+        <div className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end">
+          <div 
+            className="w-full rounded-md"
+            style={{
+              height: `${(progressValues.pan2 / 20) * 100}%`, 
+              backgroundColor: getColorForValue(progressValues.pan2)
+            }}
+          />
+        </div>
+        <Label className="text-xs text-gray-600">Pan_STD_2</Label>
+      </div>
 
-                  <div className="flex flex-col items-center space-y-2">
-                    <Label>Tilt_STD_1</Label>
-                    <div 
-                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
-                    >
-                      <div 
-                        className="w-full rounded-md"
-                        style={{
-                          height: `${(progressValues.tilt1 / 20) * 100}%`, // Adjust height based on 0-20 range
-                          backgroundColor: getColorForValue(progressValues.tilt1)
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm">{Number(progressValues.tilt1).toFixed(3)}</span>
-                  </div>
+      {/* Tilt_STD_1 */}
+      <div className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg">
+        <span className="text-sm font-semibold">{Number(progressValues.tilt1).toFixed(3)}</span>
+        <div className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end">
+          <div 
+            className="w-full rounded-md"
+            style={{
+              height: `${(progressValues.tilt1 / 20) * 100}%`, 
+              backgroundColor: getColorForValue(progressValues.tilt1)
+            }}
+          />
+        </div>
+        <Label className="text-xs text-gray-600">Tilt_STD_1</Label>
+      </div>
 
-                  <div className="flex flex-col items-center space-y-2">
-                    <Label>Tilt_STD_2</Label>
-                    <div 
-                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
-                    >
-                      <div 
-                        className="w-full rounded-md"
-                        style={{
-                          height: `${(progressValues.tilt2 / 20) * 100}%`, // Adjust height based on 0-20 range
-                          backgroundColor: getColorForValue(progressValues.tilt2)
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm">{Number(progressValues.tilt2).toFixed(3)}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Tilt_STD_2 */}
+      <div className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg">
+        <span className="text-sm font-semibold">{Number(progressValues.tilt2).toFixed(3)}</span>
+        <div className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end">
+          <div 
+            className="w-full rounded-md"
+            style={{
+              height: `${(progressValues.tilt2 / 20) * 100}%`, 
+              backgroundColor: getColorForValue(progressValues.tilt2)
+            }}
+          />
+        </div>
+        <Label className="text-xs text-gray-600">Tilt_STD_2</Label>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
           </div>
 
           {/* Right Column - Camera Controls */}
