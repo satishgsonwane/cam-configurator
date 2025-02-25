@@ -691,57 +691,69 @@ export default function Home() {
                   Validate Calibration
                 </Button>
 
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <Label>Pan_STD_1</Label>
-                      <span>{Number(progressValues.pan1).toFixed(3)}</span>
-                    </div>
+                <div className="flex justify-around space-x-4">
+                  <div className="flex flex-col items-center space-y-2">
+                    <Label>Pan_STD_1</Label>
                     <div 
-                      className="h-2 rounded-full" 
-                      style={{
-                        backgroundColor: getColorForValue(progressValues.pan1)
-                      }}
-                    />
+                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
+                    >
+                      <div 
+                        className="w-full rounded-md"
+                        style={{
+                          height: `${(progressValues.pan1 / 20) * 100}%`, // Adjust height based on 0-20 range
+                          backgroundColor: getColorForValue(progressValues.pan1)
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm">{Number(progressValues.pan1).toFixed(3)}</span>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <Label>Pan_STD_2</Label>
-                      <span>{Number(progressValues.pan2).toFixed(3)}</span>
-                    </div>
+                  <div className="flex flex-col items-center space-y-2">
+                    <Label>Pan_STD_2</Label>
                     <div 
-                      className="h-2 rounded-full" 
-                      style={{
-                        backgroundColor: getColorForValue(progressValues.pan2)
-                      }}
-                    />
+                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
+                    >
+                      <div 
+                        className="w-full rounded-md"
+                        style={{
+                          height: `${(progressValues.pan2 / 20) * 100}%`, // Adjust height based on 0-20 range
+                          backgroundColor: getColorForValue(progressValues.pan2)
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm">{Number(progressValues.pan2).toFixed(3)}</span>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <Label>Tilt_STD_1</Label>
-                      <span>{Number(progressValues.tilt1).toFixed(3)}</span>
-                    </div>
+                  <div className="flex flex-col items-center space-y-2">
+                    <Label>Tilt_STD_1</Label>
                     <div 
-                      className="h-2 rounded-full" 
-                      style={{
-                        backgroundColor: getColorForValue(progressValues.tilt1)
-                      }}
-                    />
+                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
+                    >
+                      <div 
+                        className="w-full rounded-md"
+                        style={{
+                          height: `${(progressValues.tilt1 / 20) * 100}%`, // Adjust height based on 0-20 range
+                          backgroundColor: getColorForValue(progressValues.tilt1)
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm">{Number(progressValues.tilt1).toFixed(3)}</span>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <Label>Tilt_STD_2</Label>
-                      <span>{Number(progressValues.tilt2).toFixed(3)}</span>
-                    </div>
+                  <div className="flex flex-col items-center space-y-2">
+                    <Label>Tilt_STD_2</Label>
                     <div 
-                      className="h-2 rounded-full" 
-                      style={{
-                        backgroundColor: getColorForValue(progressValues.tilt2)
-                      }}
-                    />
+                      className="w-8 h-32 bg-gray-200 rounded-md overflow-hidden flex items-end"
+                    >
+                      <div 
+                        className="w-full rounded-md"
+                        style={{
+                          height: `${(progressValues.tilt2 / 20) * 100}%`, // Adjust height based on 0-20 range
+                          backgroundColor: getColorForValue(progressValues.tilt2)
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm">{Number(progressValues.tilt2).toFixed(3)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -909,7 +921,7 @@ export default function Home() {
               <CardContent className="space-y-4">
                 <Button 
                   onClick={handleTestLandmarkPt}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full bg-green-500 hover:bg-green-700 text-black hover:text-white"
                 >
                   Calculate Landmark PT
                 </Button>
@@ -953,7 +965,7 @@ export default function Home() {
 
                 <Button 
                   onClick={handleCheckPosition}
-                  className="w-full bg-green-300 hover:bg-green-500 text-black hover:text-white"
+                  className="w-full bg-green-500 hover:bg-green-700 text-black hover:text-white"
                 >
                   Check Position
                 </Button>
