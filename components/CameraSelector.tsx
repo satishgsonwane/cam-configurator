@@ -11,12 +11,29 @@ interface Props {
   selectedCamera: string;
   setSelectedCamera: (camera: string) => void;
   setSelectedLandmark: (landmark: string) => void;
+  setProgressValues: (values: { pan1: number; pan2: number; tilt1: number; tilt2: number }) => void;
+  setLandmarkPtValues: (values: Record<string, { pan: number; tilt: number }>) => void;
+  setSelectedVerificationLandmark: (landmark: string) => void;
+  setVerificationPanValue: (value: string) => void;
+  setVerificationTiltValue: (value: string) => void;
 }
 
-export default function CameraSelector({ config, selectedCamera, setSelectedCamera, setSelectedLandmark }: Props) {
+export default function CameraSelector({ config, selectedCamera, setSelectedCamera, setSelectedLandmark, setProgressValues, setLandmarkPtValues, setSelectedVerificationLandmark, setVerificationPanValue, setVerificationTiltValue }: Props) {
   const handleCameraChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCamera(event.target.value)
     setSelectedLandmark("") // Reset landmark when camera changes
+
+    // Reset Validate Calibration and Calculate Landmark PT fields
+    setProgressValues({
+      pan1: 0,
+      pan2: 0,
+      tilt1: 0,
+      tilt2: 0
+    })
+    setLandmarkPtValues({})
+    setSelectedVerificationLandmark("")
+    setVerificationPanValue("")
+    setVerificationTiltValue("")
   }
 
   return (

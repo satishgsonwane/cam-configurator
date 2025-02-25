@@ -90,6 +90,12 @@ export default function Home() {
 
   const [enclosureOpen, setEnclosureOpen] = useState(false)
 
+  const [progressValues, setProgressValues] = useState({
+    pan1: 0,
+    pan2: 0,
+    tilt1: 0,
+    tilt2: 0
+  });
   const [landmarkPtValues, setLandmarkPtValues] = useState<Record<string, { pan: number; tilt: number }>>({});
   const [selectedVerificationLandmark, setSelectedVerificationLandmark] = useState("");
   const [verificationPanValue, setVerificationPanValue] = useState("");
@@ -103,13 +109,6 @@ export default function Home() {
     }
     return true
   }
-
-  const [progressValues, setProgressValues] = useState({
-    pan1: 0,
-    pan2: 0,
-    tilt1: 0,
-    tilt2: 0
-  });
 
   const handleTestCalibration = async () => {
     if (!selectedCamera) {
@@ -132,7 +131,7 @@ export default function Home() {
         throw new Error(data.error || "Failed to test calibration")
       }
 
-      // Update progress values with raw standard deviation values
+      // Ensure the object matches the expected shape
       setProgressValues({
         pan1: data.PAN_STD_1,
         pan2: data.PAN_STD_2,
@@ -827,6 +826,11 @@ export default function Home() {
                   selectedCamera={selectedCamera}
                   setSelectedCamera={setSelectedCamera}
                   setSelectedLandmark={setSelectedLandmark}
+                  setProgressValues={setProgressValues}
+                  setLandmarkPtValues={setLandmarkPtValues}
+                  setSelectedVerificationLandmark={setSelectedVerificationLandmark}
+                  setVerificationPanValue={setVerificationPanValue}
+                  setVerificationTiltValue={setVerificationTiltValue}
                 />
                 <LandmarkSelector
                   config={config as any}
