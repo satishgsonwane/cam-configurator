@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     // Get the absolute path to the test/AI_configs directory
-    const configDir = path.join(process.cwd(), 'test', 'AI_configs')
+    const configDir = path.join(process.cwd(), 'home', 'ozer', 'AI', 'AI_configs')
     const mainConfigPath = path.join(configDir, 'config.json')
     const modifiedConfigPath = path.join(configDir, 'config_modified.json')
     
