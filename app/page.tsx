@@ -118,32 +118,32 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch("/api/test-calibration", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ selectedCamera }),
-      })
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
 
-      const data = await response.json()
+      const raw = JSON.stringify({
+        camId: parseInt(selectedCamera.replace(/\D/g, '')), // Extract numeric ID from selectedCamera
+      });
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+      };
+
+      const response = await fetch(`http://localhost:8081/equations/calibrate?venue=${venueNumber}`, requestOptions);
+      const result = await response.text();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to test calibration")
+        throw new Error(result || "Failed to test calibration");
       }
 
-      // Update progress values with raw standard deviation values
-      setProgressValues({
-        pan1: data.PAN_STD_1,
-        pan2: data.PAN_STD_2,
-        tilt1: data.TILT_STD_1,
-        tilt2: data.TILT_STD_2
-      })
-
-      toast.success("Calibration test completed")
+      console.log(result);
+      toast.success("Calibration test completed");
     } catch (error) {
-      console.error("Error testing calibration:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to test calibration")
+      console.error("Error testing calibration:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to test calibration");
     }
   }
 
@@ -154,25 +154,32 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch("/api/test-landmark-pt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ selectedCamera }),
-      })
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
 
-      const data = await response.json()
+      const raw = JSON.stringify({
+        camId: parseInt(selectedCamera.replace(/\D/g, '')), // Extract numeric ID from selectedCamera
+      });
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+      };
+
+      const response = await fetch(`http://localhost:8081/equations/landmark?venue=${venueNumber}`, requestOptions);
+      const result = await response.text();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to test landmark PT")
+        throw new Error(result || "Failed to test landmark PT");
       }
 
-      setLandmarkPtValues(data)
-      toast.success("Landmark PT test completed")
+      console.log(result);
+      toast.success("Landmark PT test completed");
     } catch (error) {
-      console.error("Error testing landmark PT:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to test landmark PT")
+      console.error("Error testing landmark PT:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to test landmark PT");
     }
   }
 
