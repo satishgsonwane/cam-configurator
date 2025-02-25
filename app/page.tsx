@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { useState, useEffect, useRef } from "react"
 import CameraSelector from "../components/CameraSelector"
 import LandmarkSelector from "../components/LandmarkSelector"
@@ -125,11 +126,11 @@ export default function Home() {
         camId: parseInt(selectedCamera.replace(/\D/g, '')), // Extract numeric ID from selectedCamera
       });
 
-      const requestOptions = {
+      const requestOptions: RequestInit = {
         method: "POST",
         headers: myHeaders,
         body: raw,
-        redirect: "follow"
+        redirect: 'follow' as RequestRedirect
       };
 
       const response = await fetch(`http://localhost:8081/equations/calibrate?venue=${venueNumber}`, requestOptions);
@@ -161,11 +162,11 @@ export default function Home() {
         camId: parseInt(selectedCamera.replace(/\D/g, '')), // Extract numeric ID from selectedCamera
       });
 
-      const requestOptions = {
+      const requestOptions: RequestInit = {
         method: "POST",
         headers: myHeaders,
         body: raw,
-        redirect: "follow"
+        redirect: 'follow' as RequestRedirect
       };
 
       const response = await fetch(`http://localhost:8081/equations/landmark?venue=${venueNumber}`, requestOptions);
