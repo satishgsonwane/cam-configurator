@@ -20,7 +20,8 @@ export async function POST(req: Request) {
       eventData: {
         pansetpoint: message.pansetpoint,
         tiltsetpoint: message.tiltsetpoint,
-        zoomsetpoint: message.zoomsetpoint
+        zoomsetpoint: message.zoomsetpoint,
+        zoomvarspeed:message.zoomvarspeed,
       }
     })
 

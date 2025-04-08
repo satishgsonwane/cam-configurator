@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/sonner"
 export const metadata: Metadata = {
   title: 'Camera Calibration',
   description: 'Created with v0',
-  generator: 'v0.dev',
+  generator: 'OZ Sports',
 }
 
 export default function RootLayout({

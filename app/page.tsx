@@ -73,7 +73,7 @@ export default function Home() {
   const [selectedLandmark, setSelectedLandmark] = useState("")
   const [panValue, setPanValue] = useState("")
   const [tiltValue, setTiltValue] = useState("")
-  const [zoomValue, setZoomValue] = useState("12000")
+  const [zoomValue, setZoomValue] = useState("14000")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [panError, setPanError] = useState("")
@@ -197,6 +197,7 @@ export default function Home() {
       pansetpoint: Number(verificationPanValue),
       tiltsetpoint: Number(verificationTiltValue),
       zoomsetpoint: Number(zoomValue),
+      zoomvarspeed:Number(7),
     }
 
     try {
@@ -234,6 +235,7 @@ export default function Home() {
             const [pan, tilt] = camera.calibration_data[selectedLandmark]
             setPanValue(pan.toString())
             setTiltValue(tilt.toString())
+            setZoomValue("14000") // Default zoom value
           }
         }
       } catch (error) {
@@ -296,6 +298,7 @@ export default function Home() {
       pansetpoint: Number(panValue),
       tiltsetpoint: Number(tiltValue),
       zoomsetpoint: Number(zoomValue),
+      zoomvarspeed:Number(7),
     }
 
     try {
@@ -409,6 +412,7 @@ export default function Home() {
       pansetpoint: 0,
       tiltsetpoint: 0,
       zoomsetpoint: 0,
+      zoomvarspeed:7,
     }
 
     try {
