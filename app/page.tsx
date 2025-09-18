@@ -83,6 +83,7 @@ export default function Home() {
   const [zoom, setZoom] = useState<number>(12000)
 
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [recenterAllStatus, setRecenterAllStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
 
   const [venueNumber, setVenueNumber] = useState("13")
 
@@ -257,6 +258,44 @@ export default function Home() {
     }
   }, []) // Empty dependency array for unmount only
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Enter for "Take me there!"
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault()
+        if (selectedCamera && selectedLandmark && panValue && tiltValue && zoomValue) {
+          handleMove()
+        } else {
+          toast.error("Please select camera, landmark, and fill all position values first")
+        }
+      }
+      
+      // Ctrl+R for recenter
+      if (e.ctrlKey && e.key === 'r' && !e.shiftKey) {
+        e.preventDefault()
+        if (selectedCamera) {
+          handleReset()
+        } else {
+          toast.error("Please select a camera first")
+        }
+      }
+      
+      // Ctrl+Shift+R for recenter all
+      if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+        e.preventDefault()
+        if (config?.camera_config && config.camera_config.length > 0) {
+          handleRecenterAll()
+        } else {
+          toast.error("Please import config first")
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [selectedCamera, selectedLandmark, panValue, tiltValue, zoomValue, config])
+
   const validatePan = (value: string) => {
     const pan = Number(value)
     if (isNaN(pan) || pan < -55 || pan > 55) {
@@ -430,6 +469,52 @@ export default function Home() {
     } catch (error) {
       console.error("Error sending reset command:", error)
       toast.error("Failed to send reset command")
+    }
+  }
+
+  const handleRecenterAll = async () => {
+    if (!config?.camera_config || !validateVenue(venueNumber)) {
+      toast.error("Please import config and set valid venue first")
+      return
+    }
+
+    setRecenterAllStatus("loading")
+    const message = {
+      pansetpoint: 0,
+      tiltsetpoint: 0,
+      zoomsetpoint: 0,
+      zoomvarspeed: 7,
+    }
+
+    try {
+      // Send recenter command to all cameras
+      const promises = config.camera_config.map(async (camera: CameraConfig) => {
+        const response = await fetch("/api/move", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            camera: camera.camera_id, 
+            message,
+            venue: venueNumber 
+          }),
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to recenter camera ${camera.camera_id}`)
+        }
+        return response
+      })
+
+      await Promise.all(promises)
+      toast.success(`All ${config.camera_config.length} cameras recentered successfully`)
+      setRecenterAllStatus("success")
+    } catch (error) {
+      console.error("Error recentering all cameras:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to recenter all cameras")
+      setRecenterAllStatus("error")
+    } finally {
+      setTimeout(() => {
+        setRecenterAllStatus("idle")
+      }, 2000)
     }
   }
 
@@ -802,45 +887,70 @@ export default function Home() {
                 </TooltipProvider>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <TooltipProvider>
-                    <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <Label className="text-sm font-medium cursor-help">Venue Number</Label>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Enter the venue number for camera control (e.g., 13)</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <Input
-                    type="number"
-                    value={venueNumber}
-                    onChange={(e) => setVenueNumber(e.target.value)}
-                    placeholder="Enter venue number"
-                    className="w-full"
-                  />
+                <div className="flex gap-4">
+                  <div className="w-1/2 space-y-4">
+                    <div className="space-y-2">
+                      <TooltipProvider>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <Label className="text-sm font-medium cursor-help">Venue Number</Label>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Enter the venue number for camera control (e.g., 13)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <Input
+                        type="number"
+                        value={venueNumber}
+                        onChange={(e) => setVenueNumber(e.target.value)}
+                        placeholder="Enter venue number"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <CameraSelector
+                      config={config as any}
+                      selectedCamera={selectedCamera}
+                      setSelectedCamera={setSelectedCamera}
+                      setSelectedLandmark={setSelectedLandmark}
+                      setProgressValues={setProgressValues}
+                      setLandmarkPtValues={setLandmarkPtValues}
+                      setSelectedVerificationLandmark={setSelectedVerificationLandmark}
+                      setVerificationPanValue={setVerificationPanValue}
+                      setVerificationTiltValue={setVerificationTiltValue}
+                    />
+                    <LandmarkSelector
+                      config={config as any}
+                      selectedCamera={selectedCamera}
+                      selectedLandmark={selectedLandmark}
+                      setSelectedLandmark={setSelectedLandmark}
+                      setPanValue={setPanValue}
+                      setTiltValue={setTiltValue}
+                    />
+                  </div>
+                  
+                  <div className="w-1/2 flex flex-col justify-center items-center">
+                    <TooltipProvider>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            onClick={handleMove} 
+                            className="bg-blue-700 text-white hover:bg-blue-500 h-1/2 w-1/2 text-lg hover:text-black flex flex-col items-center justify-center p-2"
+                            disabled={!selectedCamera || !selectedLandmark}
+                          >
+                            <Move3D className="h-4 w-4 mb-1" />
+                            <span className="text-l leading-tight font-semibold">Take me there!</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Move camera to selected position</p>
+                          <p className="text-xs text-gray-400 mt-1">Ctrl+Enter</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
-                
-                <CameraSelector
-                  config={config as any}
-                  selectedCamera={selectedCamera}
-                  setSelectedCamera={setSelectedCamera}
-                  setSelectedLandmark={setSelectedLandmark}
-                  setProgressValues={setProgressValues}
-                  setLandmarkPtValues={setLandmarkPtValues}
-                  setSelectedVerificationLandmark={setSelectedVerificationLandmark}
-                  setVerificationPanValue={setVerificationPanValue}
-                  setVerificationTiltValue={setVerificationTiltValue}
-                />
-                <LandmarkSelector
-                  config={config as any}
-                  selectedCamera={selectedCamera}
-                  selectedLandmark={selectedLandmark}
-                  setSelectedLandmark={setSelectedLandmark}
-                  setPanValue={setPanValue}
-                  setTiltValue={setTiltValue}
-                />
               </CardContent>
             </Card>
 
@@ -848,23 +958,48 @@ export default function Home() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pr-6">
                 <CardTitle className="text-lg">Position Controls</CardTitle>
-                <TooltipProvider>
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        onClick={handleReset} 
-                        variant="outline"
-                        className="bg-purple-100 hover:bg-purple-200 text-purple-600 border-purple-300 hover:border-purple-400 transition-colors font-semibold"
-                      >
-                        <Crosshair className="h-4 w-4 mr-2 text-purple-600" />
-                        Recenter
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Move cameras to Pan: Zero, Tilt: Zero and Zoom: Zero</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <div className="flex gap-2">
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          onClick={handleReset} 
+                          variant="outline"
+                          className="bg-purple-100 hover:bg-purple-200 text-purple-600 border-purple-300 hover:border-purple-400 transition-colors font-semibold"
+                        >
+                          <Crosshair className="h-4 w-4 mr-2 text-purple-600" />
+                          Recenter
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Move selected camera to Pan: Zero, Tilt: Zero and Zoom: Zero</p>
+                        <p className="text-xs text-gray-400 mt-1">Ctrl+R</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          onClick={handleRecenterAll} 
+                          variant="outline"
+                          disabled={recenterAllStatus === "loading"}
+                          className="bg-orange-100 hover:bg-orange-200 text-orange-600 border-orange-300 hover:border-orange-400 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Crosshair className="h-4 w-4 mr-2 text-orange-600" />
+                          {recenterAllStatus === "loading" ? "Recentering..." : 
+                           recenterAllStatus === "success" ? "Recentered!" :
+                           recenterAllStatus === "error" ? "Error!" : "Recenter All"}
+                        </Button>
+                      </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Move all cameras to Pan: Zero, Tilt: Zero and Zoom: Zero</p>
+                          <p className="text-xs text-gray-400 mt-1">Ctrl+Shift+R</p>
+                        </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -908,13 +1043,23 @@ export default function Home() {
                   {zoomError && <Alert variant="destructive" className="text-xs p-2">{zoomError}</Alert>}
                 </div>
 
-                <Button 
-                  onClick={handleMove} 
-                  className="w-full bg-blue-700 text-white hover:bg-blue-500 h-12 text-lg hover:text-black"
-                >
-                  <Move3D className="h-5 w-5 mr-2" />
-                  Take me there!
-                </Button>
+                <TooltipProvider>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleMove} 
+                        className="w-full bg-blue-700 text-white hover:bg-blue-500 h-12 text-lg hover:text-black"
+                      >
+                        <Move3D className="h-5 w-5 mr-2" />
+                        Take me there!
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Move camera to selected position</p>
+                      <p className="text-xs text-gray-400 mt-1">Ctrl+Enter</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </CardContent>
             </Card>
 

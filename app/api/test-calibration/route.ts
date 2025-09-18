@@ -3,6 +3,7 @@ import { spawn } from 'child_process'
 import path from 'path'
 
 function installDependencies(dependencies: string[]): Promise<void> {
+
   return new Promise((resolve, reject) => {
     const installProcess = spawn('/usr/bin/python3', ['-m', 'pip', 'install', ...dependencies])
 
@@ -63,6 +64,8 @@ export async function POST(request: Request) {
       })
 
       pythonProcess.on('close', async (code) => {
+
+        console.log('Python process closed with code:', code)
         if (code !== 0) {
           if (error.includes("ModuleNotFoundError")) {
             const moduleMatch = error.match(/No module named '(\w+)'/)
@@ -88,12 +91,14 @@ export async function POST(request: Request) {
             const results = JSON.parse(output)
             resolve(NextResponse.json(results))
           } catch {
+            console.error('Failed to parse output:', output)
             resolve(NextResponse.json({ error: 'Invalid output format' }, { status: 500 }))
           }
         }
       })
     })
   } catch (error) {
+    console.error('Error in POST /api/test-calibration:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
